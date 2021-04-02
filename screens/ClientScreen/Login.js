@@ -46,7 +46,7 @@ export default function Login({navigation}){
         axios.post(host + '/users/login', response)
         .then( async(res) => {
             const doctors = await axios.get(host + '/doctors/getalldoctors')
-            await dispatch(addDoctorInfor(doctors))
+            await dispatch(addDoctorInfor(doctors.data))
             await AsyncStorage.setItem('UserToken', res.data.token);
             await dispatch(addUser(res.data.data))
             navigation.replace('Home')

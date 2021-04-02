@@ -7,20 +7,20 @@ import {name as appName} from './app.json'
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import Opening from './screens/Opening'
-import Login from './screens/Login'
-import Home from './screens/Home'
-import Loading from './screens/Loading'
-import Register from './screens/Register'
+import Opening from './screens/ClientScreen/Opening'
+import Login from './screens/ClientScreen/Login'
+import Home from './screens/ClientScreen/Home'
+import Loading from './screens/ClientScreen/Loading'
+import Register from './screens/ClientScreen/Register'
 import configureStore from './store'
-import MakeaApp from './screens/MakeaApp';
-import Message from './screens/Message'
-import Schedule from './screens/Schedules'
-import DoctorHome from './screens/DoctorHome'
-import DoctorLogin from './screens/DoctorLogin'
-import DoctorLoading from './screens/DoctorLoading'
-import ExamHistory from './screens/ExamHistory'
-import Chat from './screens/Chat'
+import MakeaApp from './screens/ClientScreen/MakeaApp';
+import Message from './screens/ClientScreen/Message'
+import Schedule from './screens/ClientScreen/Schedules'
+import DoctorHome from './screens/DoctorScreen/DoctorHome'
+import DoctorLogin from './screens/DoctorScreen/DoctorLogin'
+import DoctorLoading from './screens/DoctorScreen/DoctorLoading'
+import ExamHistory from './screens/ClientScreen/ExamHistory'
+import Chat from './screens/ClientScreen/Chat'
 
 const Stack = createStackNavigator();
 

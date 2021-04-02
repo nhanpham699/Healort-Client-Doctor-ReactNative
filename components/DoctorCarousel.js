@@ -5,7 +5,6 @@ import Carousel, { Pagination } from 'react-native-snap-carousel'
 import CarouselCardItem, { SLIDER_WIDTH, ITEM_WIDTH } from './DoctorCarouselCardItem'
 import host from '../host'
 import {useSelector} from 'react-redux'
-const { doctors } = useSelector(state => state.doctorInfor)
 
 // const data = [
 //     {
@@ -25,21 +24,27 @@ const { doctors } = useSelector(state => state.doctorInfor)
 //     }
 //   ]
 
-// const ratingTotal = (rate) => {
-//     let total = 0
-//     for(let i of rate){
-//         total += i.rating 
-//     }
-//     return total
-// }
+const ratingTotal = (rate) => {
+    let total = 0
+    for(let i of rate){
+        total += i.rating 
+    }
+    return total
+}
 
 const DoctorCarousel = () => {
+    const { doctors } = useSelector(state => state.doctorInfor)
+
+
     const isCarousel = React.useRef(null)
     const [data,setData] = useState([])
 
-    // useEffect(() => {
-    //     setData(doctors)
-    // },[])
+    useEffect(() => {
+        const dataFilter = doctors.map(dt => {
+            return {...dt, review: ratingTotal(dt.review)}
+        })
+        setData(dataFilter)
+    },[doctors])
   
     // // console.log(data);
     return (

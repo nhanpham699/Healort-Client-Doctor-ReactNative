@@ -93,7 +93,7 @@ export default function DoctorLogin({navigation}){
                 <TouchableOpacity onPress={login}>
                     <View style={styles.button}>
                         <LinearGradient
-                            colors={['#99ffff', '#00bfff']}
+                            colors={['#ffcccc', '#ff8080']}
                             style={styles.login}
                         >
                             <Text style={styles.login_text}>Log in</Text>
@@ -110,7 +110,7 @@ export default function DoctorLogin({navigation}){
 var styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#00bfff'
+        backgroundColor: '#ff8080'
     },
     header: {
         flex: 1,

@@ -8,7 +8,8 @@ import {
     TextInput,
     Alert
  } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import {addDoctorInfor} from '../actions/doctor.infor'
+import {useDispatch} from 'react-redux'
 import { FontAwesome, AntDesign, Feather } from '@expo/vector-icons'; 
 import { LinearGradient } from 'expo-linear-gradient'
 import host from '../host'
@@ -23,7 +24,8 @@ const Star = (props) => {
 }
 
 export default ReviewModal = (props,{navigation}) => {
-
+  const dispatch = useDispatch()
+  
   const {data, modal, setModal} = props
 
   const stars = [1,2,3,4,5]
@@ -50,11 +52,10 @@ export default ReviewModal = (props,{navigation}) => {
             [
                 {
                 text: "ok",
-                onPress: () =>  {
-                    axios.post(host + '/schedules/add', data)
-                    .then(() => {
-                        setModal(!modal)
-                    })
+                onPress: async() =>  {
+                    const doctors = await axios.get(host + '/doctors/getalldoctors')
+                    await dispatch(addDoctorInfor(doctors.data))
+                    setModal(!modal)
                 },
                 style: "cancel",
                 },

@@ -14,20 +14,19 @@ import { Entypo, Ionicons, FontAwesome, MaterialIcons } from '@expo/vector-icons
 import * as Animatable from 'react-native-animatable'
 
 
-import Profile from './Profile'
-import Notification from './Notification'
-import Bar from './Bar'
+import DoctorProfile from './DoctorProfile'
+import DoctorNotification from './DoctorNotification'
+import DoctorBar from './DoctorBar'
 
 import Flatlist from '../components/DoctorMenu'
 
-const MainScreen = ({navigation}) => {
+const MainScreen = () => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <View style={styles.header}>
                
             </View>
-            
             <Animatable.View style={styles.footer} animation='fadeInUpBig'>
                     <View style={{
                         ...StyleSheet.absoluteFill,
@@ -70,7 +69,7 @@ export default function Home(){
             />
             <Tab.Screen
                 name="Profile"
-                component={Profile}
+                component={DoctorProfile}
                 options={{
                 tabBarLabel: 'Profile',
                 tabBarIcon: ({ color }) => (
@@ -80,7 +79,7 @@ export default function Home(){
             />
             <Tab.Screen
                 name="Notifications"
-                component={Notification}
+                component={DoctorNotification}
                 options={{
                 tabBarLabel: 'Notification',
                 tabBarIcon: ({ color }) => (
@@ -90,7 +89,7 @@ export default function Home(){
             />
             <Tab.Screen
                 name="Bar"
-                component={Bar}
+                component={DoctorBar}
                 options={{
                 tabBarLabel: 'Bar',
                 tabBarIcon: ({ color }) => (
@@ -109,14 +108,14 @@ var styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: '#00bfff'
+        backgroundColor: '#ff8080'
     },
     header: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingTop: 15,
-        backgroundColor: '#00bfff'	
+        backgroundColor: '#ff8080'	
     },
     footer: {
         flex: 2,
