@@ -8,24 +8,19 @@ import { NavigationContainer, useNavigation } from "@react-navigation/native";
 const DATA = [
   {
     id: "1",
-    title: "Make a appointment",
+    title: "My patients",
     icon: "plus-square"
   },
   {
     id: "2",
-    title: "Schedules",
+    title: "My schedules",
     icon: "calendar"
   },
   {
     id: "3",
-    title: "Chat with doctors",
+    title: "Chat with client",
     icon: "comment"
   },
-  {
-    id: "4",
-    title: "Mannage schedules",
-    icon: "list-alt"
-  }
 ];
 
 
@@ -51,10 +46,9 @@ const Flatlist = ({}) => {
 
   const menuPress = (id) => {
     switch(id) {
-        case '1':  return navigation.navigate('MakeaApp')
-        case '2':  return navigation.navigate('Schedule')
-        case '3':  return navigation.navigate('Chat')
-        case '4':  return navigation.navigate('Manage')
+        case '1':  return navigation.navigate('Patient')
+        case '2':  return navigation.navigate('DoctorSchedule')
+        case '3':  return navigation.navigate('DoctorChat')
     }
   }
 

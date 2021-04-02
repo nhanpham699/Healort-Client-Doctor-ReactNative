@@ -3,10 +3,10 @@ import {
     View,
     Text
 } from 'react-native'
-export default function Manage() {
+export default function History() {
     return(
         <View>
-            <Text>Manage</Text>
+            <Text>history</Text>
         </View>
     )
 }

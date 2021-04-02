@@ -1,29 +1,30 @@
+
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, View, AsyncStorage} from 'react-native'
-import {addUser} from '../actions/user'
+import {addDoctor} from '../actions/doctor'
 import {useDispatch} from 'react-redux'
 import host from '../host'
 import axios from 'axios'
 
-export default function Loading({navigation}) {
+export default function DoctorLoading({navigation}) {
     const dispatch = useDispatch()
 
     const changePage = async () => {
-       
-        const UserToken = await AsyncStorage.getItem('UserToken')
+        console.log("assssssssssssss");
+        const DoctorToken = await AsyncStorage.getItem('DoctorToken')
 
-        if(UserToken){
-            await axios.get(host + '/users/getuser', {
+        if(DoctorToken){
+            await axios.get(host + '/doctors/getdoctor', {
                 headers: {
-                    Authorization: `Bearer ${UserToken}`,
+                    Authorization: `Bearer ${DoctorToken}`,
                 },
             }).then(async (res) => {
-                await dispatch(addUser(res.data.dataSending))
-                navigation.replace('Home')
+                await dispatch(addDoctor(res.data.dataSending))
+                navigation.replace('DoctorHome')
             })
         }else{
-            navigation.replace('Login')
-        }
+            navigation.replace('DoctorLogin')
+        } 
     }
     
     useEffect(() => {

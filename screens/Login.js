@@ -8,7 +8,8 @@ import {
     Dimensions,
     TouchableOpacity,
     TextInput,
-    AsyncStorage
+    AsyncStorage,
+    KeyboardAvoidingView,
 } from 'react-native'
 
 import * as Animatable from 'react-native-animatable'
@@ -19,7 +20,7 @@ import {EyeOff, Eye} from 'react-native-feather'
 import axios from 'axios'
 import host from '../host'
 import {useDispatch, useSelector} from 'react-redux'
-
+import { addDoctorInfor } from '../actions/doctor.infor'
 import { addUser } from '../actions/user'
 
 
@@ -44,7 +45,9 @@ export default function Login({navigation}){
         
         axios.post(host + '/users/login', response)
         .then( async(res) => {
-            await AsyncStorage.setItem('token', res.data.token);
+            const doctors = await axios.get(host + '/doctors/getalldoctors')
+            await dispatch(addDoctorInfor(doctors))
+            await AsyncStorage.setItem('UserToken', res.data.token);
             await dispatch(addUser(res.data.data))
             navigation.replace('Home')
         }).catch(err => {
@@ -56,66 +59,76 @@ export default function Login({navigation}){
     
 
     return(
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" />
-            <View style={styles.header}>
-                <Text style={styles.title}>Welcome!</Text>
-            </View>
-            <Animatable.View style={styles.footer} animation='fadeInUpBig'>
-                <Text style={styles.text_footer}>Email</Text>
-                <View style={styles.action}>
-                    <FontAwesomeIcon icon={faUser} size={20} />
-                    <TextInput
-                        value={text.email} 
-                        placeholder="Your email" 
-                        style={styles.text_input} 
-                        autoCapitalize="none" 
-                        onChangeText={value => setText({...text, email:value})}
-                    />
-                </View> 
-                <Text style={[styles.text_footer, { marginTop:35 }]}>Password</Text>
-                <View style={styles.action}>
-                    <FontAwesomeIcon icon={faLock} size={20} />
-                    <TextInput 
-                        value={text.password}
-                        placeholder="Your password" 
-                        style={styles.text_input} 
-                        autoCapitalize="none" 
-                        secureTextEntry={secureText}
-                        onChangeText={value => setText({...text, password:value})} 
-                    />
-                    <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                        {secureText ? <EyeOff color="gray" size={20} />
-                                    : <Eye color="green" size={20} />}
-                    </TouchableOpacity>
-                </View> 
-                <TouchableOpacity onPress={login}>
-                    <View style={styles.button}>
-                        <LinearGradient
-                            colors={['#99ffff', '#00bfff']}
-                            style={styles.login}
-                        >
-                            <Text style={styles.login_text}>Log in</Text>
-                        </LinearGradient>
+        <KeyboardAvoidingView style={{flex: 1}} behavior="padding">
+            <SafeAreaView style={styles.container}>
+                <StatusBar barStyle="dark-content" />
+                <View style={styles.header}>
+                    <View style={styles.title}>
+                        <Animatable.Text animation="bounceIn" duration={1500} style={styles.texttitle}>Sunshine had hats</Animatable.Text>
+                        <Animatable.Text animation="bounceIn" duration={1700} style={[styles.texttitle, {marginLeft: 10}]}>Rain had umbrellas</Animatable.Text>
+                        <Animatable.Text animation="bounceIn" duration={2000} style={[styles.texttitle,{color: 'red', marginLeft: 20}]}>Your teeth had us</Animatable.Text>
                     </View>
-                </TouchableOpacity> 
+                    <Animatable.Image
+                        animation="bounceIn"
+                        duration={1500}
+                        source={require('../assets/doctor.png')}
+                        style={styles.logo}
+                        resizeMode={"stretch"}
+                    />
+                </View>
+                <Animatable.View style={styles.footer} animation='fadeInUpBig'>
+                    <Text style={styles.text_footer}>Email</Text>
+                    <View style={styles.action}>
+                        <FontAwesomeIcon icon={faUser} size={20} />
+                        <TextInput
+                            value={text.email} 
+                            placeholder="Your email" 
+                            style={styles.text_input} 
+                            autoCapitalize="none" 
+                            onChangeText={value => setText({...text, email:value})}
+                        />
+                    </View> 
+                    <Text style={[styles.text_footer, { marginTop:35 }]}>Password</Text>
+                    <View style={styles.action}>
+                        <FontAwesomeIcon icon={faLock} size={20} />
+                        <TextInput 
+                            value={text.password}
+                            placeholder="Your password" 
+                            style={styles.text_input} 
+                            autoCapitalize="none" 
+                            secureTextEntry={secureText}
+                            onChangeText={value => setText({...text, password:value})} 
+                        />
+                        <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                            {secureText ? <EyeOff color="gray" size={20} />
+                                        : <Eye color="green" size={20} />}
+                        </TouchableOpacity>
+                    </View> 
+                    <TouchableOpacity onPress={login}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#99ffff', '#00bfff']}
+                                style={styles.login}
+                            >
+                                <Text style={styles.login_text}>Log in</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity> 
 
-                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <View style={{marginTop: 20}}>
-                        <LinearGradient
-                            colors={[ 'white', '#e6ecff']}
-                            style={[styles.login, {borderWidth: 0.2, borderColor: '#e6ecff'}]}
-                        >
-                            <Text style={styles.login_text}>Sign up</Text>
-                        </LinearGradient>
-                    </View>
-                </TouchableOpacity>   
+                    <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                        <View style={{marginTop: 20}}>
+                            <LinearGradient
+                                colors={[ 'white', '#e6ecff']}
+                                style={[styles.login, {borderWidth: 0.2, borderColor: '#e6ecff'}]}
+                            >
+                                <Text style={styles.login_text}>Sign up</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>   
 
-                
-
-
-            </Animatable.View>
-        </SafeAreaView>
+                </Animatable.View>
+            </SafeAreaView>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -127,6 +140,7 @@ var styles = StyleSheet.create({
     },
     header: {
         flex: 1,
+        flexDirection: 'row'
     },
     footer: {
         flex: 2,
@@ -137,12 +151,22 @@ var styles = StyleSheet.create({
         paddingHorizontal: 30
     },
     title: {
-        color: 'black',
-        fontWeight: 'bold',
-        fontSize: 35,
-        marginTop: 100,
-        marginLeft: 30
+        padding: 10,
+        marginTop: 50,
+        marginLeft: 20,
+        height: 135
     },
+    texttitle: {
+        fontSize: 18,
+        fontWeight: '600',         
+        marginTop: 3
+    },
+    logo: {
+        marginTop: 20,
+        width: 180,
+        height: 150,
+        marginLeft: 10
+    },  
     text_footer: {
         fontSize: 18
     },

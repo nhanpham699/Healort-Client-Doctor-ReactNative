@@ -8,7 +8,10 @@ import {
     StatusBar,
     TextInput,
     ScrollView,
-    FlatList
+    FlatList,
+    Alert,
+    KeyboardAvoidingView,
+    SafeAreaView
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { FontAwesome, AntDesign, Feather } from '@expo/vector-icons'; 
@@ -22,7 +25,6 @@ import {useSelector} from 'react-redux'
 // Schedules Data
 
 
-console.log(schedulesData);
 //Date Data
 const date = new Date();
 let DATE_DATA = []
@@ -30,7 +32,7 @@ let DATE_DATA = []
 for(var i = 0; i<= 14; i++){
     var nextDate = new Date(date);
     nextDate.setDate(date.getDate() + i);
-    DATE_DATA.push({id: i.toString(), title: nextDate.getDate() + '-' + (nextDate.getMonth() + 1), value: nextDate})
+    DATE_DATA.push({id: i.toString(), title: nextDate.getDate() + '-' + (nextDate.getMonth() + 1), value: nextDate, state: true})
 }
 //Date Item
 const DateItem = ({ item, onPress, style }) => (
@@ -39,58 +41,41 @@ const DateItem = ({ item, onPress, style }) => (
     </TouchableOpacity>
 )
 
+
+
+
 // Hour Data
 const HOUR_DATA = [
     {
         id: '1',
         title: '8:00',
-        value: 8
+        value: 8,
+        state: true
     },
     {
         id: '2',
-        title: '9:00',
-        value: 9
+        title: '10:00',
+        value: 10,
+        state: true
     },
     {
         id: '3',
-        title: '10:00',
-        value: 10
+        title: '12:00',
+        value: 12,
+        state: true
     },
     {
         id: '4',
-        title: '11:00',
-        value: 11
+        title: '14:00',
+        value: 14,
+        state: true
     },
     {
         id: '5',
-        title: '12:00',
-        value: 12
-    },
-    {
-        id: '6',
-        title: '13:00',
-        value: 13
-    },
-    {
-        id: '7',
-        title: '14:00',
-        value: 14
-    },
-    {
-        id: '8',
-        title: '15:00',
-        value: 15
-    },
-    {
-        id: '9',
         title: '16:00',
-        value: 16
+        value: 16,
+        state: true
     },
-    {
-        id: '10',
-        title: '17:00',
-        value: 17
-    }
 ];
 // Hour Item
 const HourItem = ({ item, onPress, style }) => (
@@ -101,8 +86,18 @@ const HourItem = ({ item, onPress, style }) => (
 
 
 
-export default function MakeaApp() {
+export default function MakeaApp({navigation}) {
     const { user } = useSelector(state => state.users)
+
+    const [isChecked, setIsChecked] = useState({
+        first : false,
+        second : false,
+        third : false
+    })
+
+    const [dateArr, setDateArr] = useState(DATE_DATA)
+    const [hourArr, setHourArr] = useState(HOUR_DATA)
+
     const [selectedHourId, setSelectedHourId] = useState(null);
     const [selectedDateId, setSelectedDateId] = useState(null);
     const [data, setData] = useState({
@@ -111,181 +106,324 @@ export default function MakeaApp() {
         services: [],
         doctorId: null,
         note: null,
-        userId: user.id
+        userId: user.id,
+        status: 0
     })    
     const [doctors, setDoctors] = useState([])
     const [schedules, setSchedules] = useState([])
+    const [valiDate, setValiDate] = useState(true)
 
-
-    const getDate = (item) => {
-        setData({...data, date : item.value})
-        setSelectedDateId(item.id)
-    }
+    const refDoctors = React.useRef(null)
 
     const renderDateItem = ({ item }) => {
-        // console.log(schedules);
-        const backgroundColor = item.id === selectedDateId ? "#00e6e6" : '#e6ffff';
+        
+        let currentColor = null
+        if(!item.state){
+            currentColor = '#e6e6e6'
+        }else{
+            currentColor = '#e6ffff'
+        }
+
+        const backgroundColor = item.id === selectedDateId ? "#00e6e6" : currentColor;
         return (
             <DateItem
+            key={item.id}
             item={item}
-            onPress={() => getDate(item)}
+            onPress={item.state ? () => getDate(item) : null}
             style={{ backgroundColor }}/>
         );
     };
-    // Hour
-    const getHour = (item) => {
-        setData({...data, begin : item.value})
-        setSelectedHourId(item.id)
-    }
 
     const renderHourItem = ({ item }) => {
-        const backgroundColor = item.id === selectedHourId ? "#00e6e6" : '#e6ffff';
+        // console.log('----------------', hourArr);
+        let currentColor = null
+        if(!item.state){
+            currentColor = '#e6e6e6'
+        }else{
+            currentColor = '#e6ffff'
+        }
+
+        const backgroundColor = item.id === selectedHourId ? "#00e6e6" : currentColor;
         return (
             <HourItem
+            key={item.id}
             item={item}
-            onPress={() => getHour(item)}
+            onPress={item.state ? (() => getHour(item)) : null}
             style={{ backgroundColor }}/>
         );
     };
-    //
-    const [isChecked, setIsChecked] = useState({
-        first : false,
-        second : false,
-        third : false
-    })
+    
+    const chooseDoctor = (value) => {
+        setDateArr(DATE_DATA)
+        let arr = dateArr
+        let repeat = []
+
+        const scheduleArr = schedules.filter(dt => {
+            return dt.doctorId._id == value
+        })
+
+        for(let sch of scheduleArr){
+            for (let i = 0; i<dateArr.length; i++){
+                if(new Date(sch.date).toString().slice(0,15) == dateArr[i].value.toString().slice(0,15)){        
+                    if(repeat.find(e => e.date == dateArr[i].value && e.re+1 == 5)){
+                        arr = [
+                            ...arr.slice(0,i), 
+                            {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
+                            ...arr.slice(i+1)
+                        ]
+                        setDateArr(arr)
+                        break
+                    }else{
+                        let flag = false
+                        let index = 0
+                        for (var j=0 ; j<repeat.length; j++){
+                            if(repeat[j].date == dateArr[i].value){
+                                flag = true
+                                index = j
+                                break
+                            }
+                        }
+                        if(flag){
+                            repeat = [
+                                ...repeat.slice(0,index), 
+                                {date: dateArr[i].value, re: ++repeat[index].re}, 
+                                ...repeat.slice(index+1)
+                            ] 
+                            console.log(repeat);         
+                        }else{
+                            repeat.push({date: dateArr[i].value, re: 1})
+                        }
+                    }   
+                }
+            }
+        }       
+        setHourArr(HOUR_DATA)
+        setIsChecked({
+            first: false,
+            second: false,
+            third: false
+        })
+        setData({...data, date: null, begin: 0, services: [], doctorId: value})
+        setSelectedDateId(null)
+        setSelectedHourId(null)
+    }
+
+    
+
+    const getDate = (item) => {
+        setHourArr(HOUR_DATA)
+        setIsChecked({
+            first: false,
+            second: false,
+            third: false
+        })
+        if(!data.doctorId){
+            alert("please choose a doctor!")
+        }else{
+            let arr = hourArr
+            const scheduleArr = schedules.filter(dt => {
+                return dt.doctorId._id == data.doctorId
+            })
+            setSelectedDateId(item.id)
+            setSelectedHourId(null)
+            setData({...data, date: item.value, begin: 0, services: []})
+            for(let sch of scheduleArr) {
+                 if(new Date(sch.date).toString().slice(0,15) == item.value.toString().slice(0,15)){
+                    for(var i=0 ; i< hourArr.length;i++){ 
+                        if(sch.begin == hourArr[i].value){
+                            arr = [
+                                ...arr.slice(0,i), 
+                                {id: i+1, value: sch.begin, title: sch.begin+':00', state: false}, 
+                                ...arr.slice(i+1)
+                            ]
+                            setHourArr(arr)
+                        }                        
+                    }
+                 }
+            }
+        }   
+    }    
+    // Hour
+    const getHour = (item) => {
+        setIsChecked({
+            first: false,
+            second: false,
+            third: false
+        })
+        if(!data.date){
+            alert("you haven't chosen a date yet!")
+        }else{
+            setData({...data, begin : item.value, services: []})
+            setSelectedHourId(item.id)             
+        }
+    }
 
     useEffect(() => {
+
+        axios.get(host + '/schedules/getallschedules')
+        .then(res => {
+            setSchedules(res.data)
+        })        
 
         axios.get(host + '/doctors/getalldoctors')
         .then(res => {
             const data = res.data.map( dt=> {
-                return {label : 'Doctor ' + dt.fullname ,value: dt._id }
+                return {label : dt.fullname ,value: dt._id }
             })
             setDoctors(data)
         })
     },[])
 
     const make = () => {
-        let end = data.begin
-        if(data.services.indexOf(0) != -1)
-            end += 0.5
-        if(data.services.indexOf(1) != -1)
-            end += 1
-        if(data.services.indexOf(2) != -1)
-            end += 2
         
-        const response = {...data, end: end}
-        axios.post(host + '/schedules/add', response)
-        .then(()=> {
-            alert('Make an appointment successfully!')
-        })
+        if(!data.date || !data.doctorId || !data.begin || !data.services.length || !data.note){
+            alert("Make an appointment failed!!")
+        }else{
+            Alert.alert(
+                "Make an appointment",
+                "successfully",
+                [
+                    {
+                    text: "ok",
+                    onPress: () =>  {
+                        axios.post(host + '/schedules/add', data)
+                        .then(() => {
+                            navigation.replace("Schedule")
+                        })
+                    },
+                    style: "cancel",
+                    },
+                ],
+            );                                                                  
+        }
+        
     }
 
+    
+
     return(
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" />
-            <View style={styles.header}>
-                <Ionicons style={styles.back} name="arrow-back" size={24} color="black" />
-                <Text style={styles.headertext1}>Make an appointment</Text> 
-            </View>
-            <View style={styles.content}>
-                <Text style={styles.choose}>Choose Date/Hours of examination</Text>
-                <Text style={styles.radiotitle}>DATE</Text>
-                <View style={styles.flatlist}>
-                    <FlatList
-                        contentContainerStyle={{alignSelf: 'flex-start'}}
-                        showsHorizontalScrollIndicator={false}
-                        data={DATE_DATA}
-                        renderItem={renderDateItem}
-                        keyExtractor={(item) => item.id}
-                        extraData={selectedDateId}
-                        horizontal={true}
-                    />
-                </View> 
-                <Text style={[styles.radiotitle, {marginTop: 20}]}>HOURS</Text>
-                <View style={styles.flatlist}>
-                    <FlatList
-                        contentContainerStyle={{alignSelf: 'flex-start'}}
-                        showsHorizontalScrollIndicator={false}
-                        data={HOUR_DATA}
-                        renderItem={renderHourItem}
-                        keyExtractor={(item) => item.id}
-                        extraData={selectedHourId}
-                        horizontal={true}
-                    />
-                </View>  
-            </View>
-            <ScrollView style={styles.footer}>
-                <Text style={styles.choose}>Choose services</Text>  
-                <View style={styles.checkboxs}>
-                    <CheckBox
-                        onClick={()=>{
-                            const index = data.services.indexOf(0)
-                            if(index >= 0)
-                                setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                            else
-                                setData({...data, services: [...data.services, 0]})
-                            setIsChecked({...isChecked, first : !isChecked.first})
-                        }}
-                        isChecked={isChecked.first}
-                        leftText={"Tooth extraction (30 minutes)"}
-                    />
-                    <CheckBox
-                        onClick ={()=>{
-                            const index = data.services.indexOf(1)
-                            if(index >= 0) 
-                                setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                            else
-                                setData({...data, services: [...data.services, 1]})
-                            setIsChecked({...isChecked, second : !isChecked.second})
-                        }}
-                        isChecked={isChecked.second}
-                        leftText={"Fillings (1 hours)"}
-                    />
-                    <CheckBox
-                        onClick={()=>{
-                            const index = data.services.indexOf(2)
-                            if(index >= 0) 
-                                setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                            else
-                                setData({...data, services: [...data.services, 2]})
-                            setIsChecked({...isChecked, third : !isChecked.third})
-                        }}
-                        isChecked={isChecked.third}
-                        leftText={"Dental implants (2 hours)"}
-                    />
+        <KeyboardAvoidingView style={{flex:1}} behavior="padding">
+            <View style={styles.container}>
+                <StatusBar barStyle="dark-content" />
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Ionicons style={styles.back} name="arrow-back" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.headertext1}>Make an appointment</Text> 
                 </View>
-                <Text style={[styles.choose, {marginTop: 30}]}>Choose Doctors</Text>  
-                <View style={{flexDirection: 'row'}}> 
-                    <RNPickerSelect
-                    onValueChange={(value) => setData({...data, doctorId: value})}
-                    items={doctors}
-                    style={pickerSelectStyles} />       
-                    <AntDesign style={styles.iconDown} name="down" size={20} color="gray" />     
-                </View>    
-                <View>
-                    <Text style={styles.choose}>Note</Text>
-                    <View style={{paddingHorizontal: 15}}>
-                        <TextInput 
-                        // defaultValue={user.phone}
-                        placeholder="   Your note" 
-                        style={styles.text_input} 
-                        autoCapitalize="none"
-                        onChangeText={value => setData({...data, note: value})} />
+                <ScrollView>
+                    <View style={styles.content}>
+                        <Text style={styles.choose}>Choose Doctors</Text>  
+                        <View style={{flexDirection: 'row'}}> 
+                            <RNPickerSelect
+                            ref={refDoctors}
+                            onValueChange={(value) => chooseDoctor(value)}
+                            items={doctors}
+                            style={pickerSelectStyles} />       
+                            <AntDesign style={styles.iconDown} name="down" size={20} color="gray" />     
+                        </View>  
+                        <Text style={[styles.choose, {marginTop: 35}]}>Choose Date/Hours of examination</Text>
+                        <Text style={styles.radiotitle}>DATE</Text>
+                        <View style={styles.flatlist}>
+                            <FlatList
+                                contentContainerStyle={{alignSelf: 'flex-start'}}
+                                showsHorizontalScrollIndicator={false}
+                                data={dateArr}
+                                renderItem={renderDateItem}
+                                keyExtractor={(item) => item.id}
+                                extraData={selectedDateId}
+                                horizontal={true}
+                            />
+                        </View> 
+                        <Text style={[styles.radiotitle, {marginTop: 20}]}>HOURS</Text>
+                        <View style={styles.flatlist}>
+                            <FlatList
+                                contentContainerStyle={{alignSelf: 'flex-start'}}
+                                showsHorizontalScrollIndicator={false}
+                                data={hourArr}
+                                renderItem={renderHourItem}
+                                // keyExtractor={(item) => item.id}
+                                keyExtractor={(item, index) => index.toString()}
+                                extraData={selectedHourId}
+                                horizontal={true}
+                            />
+                        </View>  
                     </View>
-                </View>
-                <TouchableOpacity onPress={make}>
-                    <View style={styles.button}>
-                        <LinearGradient
-                            colors={['#99ffff', '#80ffff']}
-                            style={styles.make}
-                        >
-                            <Text style={styles.make_text}>Make an appointment</Text>
-                        </LinearGradient>
-                    </View>
-                </TouchableOpacity> 
-            </ScrollView>
-        </View>
+                    <View style={styles.footer}>
+                        <Text style={styles.choose}>Choose services</Text>  
+                        <View style={styles.checkboxs}>
+                            <CheckBox
+                                onClick={()=>{
+                                    if(data.begin){
+                                        const index = data.services.indexOf(0)
+                                        if(index >= 0){
+                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
+                                        }else{  
+                                            setData({...data, services: [...data.services, 0]})
+                                        }
+                                        setIsChecked({...isChecked, first : !isChecked.first})
+                                    }else alert("choose time please!")
+                                }}
+                                isChecked={isChecked.first}
+
+                                leftText={"Tooth extraction (1 hour)"}
+                            />
+                            <CheckBox
+                                onClick ={()=>{
+                                    if(data.begin){
+                                        const index = data.services.indexOf(1)
+                                        if(index >= 0) {
+                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
+                                        }else{
+                                            setData({...data, services: [...data.services, 1]})
+                                        }
+                                        setIsChecked({...isChecked, second : !isChecked.second})
+                                    }else alert("choose time please!")
+                                }}
+                                isChecked={isChecked.second}
+                                leftText={"Fillings (1 hour)"}
+                            />
+                            <CheckBox
+                                onClick={()=>{
+                                    if(data.begin){
+                                        const index = data.services.indexOf(2)
+                                        if(index >= 0){ 
+                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
+                                        }else{
+                                            setData({...data, services: [...data.services, 2]})
+                                        }
+                                        setIsChecked({...isChecked, third : !isChecked.third})
+                                    }else alert("choose time please!")
+                                }}
+                                isChecked={isChecked.third}
+                                leftText={"Dental implants (2 hours)"}
+                            />
+                        </View>  
+                        <View>
+                            <Text style={styles.choose}>Note</Text>
+                            <View style={{paddingHorizontal: 15}}>
+                                <TextInput 
+                                // defaultValue={user.phone}
+                                placeholder="   Your note" 
+                                style={styles.text_input} 
+                                autoCapitalize="none"
+                                onChangeText={value => setData({...data, note: value})} />
+                            </View>
+                        </View>
+                        <TouchableOpacity onPress={make}>
+                            <View style={styles.button}>
+                                <LinearGradient
+                                    colors={['#99ffff', '#80ffff']}
+                                    style={styles.make}
+                                >
+                                    <Text style={styles.make_text}>Make an appointment</Text>
+                                </LinearGradient>
+                            </View>
+                        </TouchableOpacity> 
+                    </View>    
+                </ScrollView>
+            </View>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -302,7 +440,7 @@ var styles = StyleSheet.create({
         flex: 1,
         lineHeight: 80,
         fontSize: 18,
-        marginRight: 25,
+        marginRight: 35,
         textAlign: 'center',
         fontWeight: '500'
     },
@@ -313,12 +451,12 @@ var styles = StyleSheet.create({
     content: {
         backgroundColor: 'white',
         marginTop: 20,
-        flex: 0.7
+        height: 350
     },
     footer:{
         backgroundColor: 'white',
         marginTop: 20, 
-        flex: 2
+        // flex: 2
     },  
     choose:{
         fontSize: 17,

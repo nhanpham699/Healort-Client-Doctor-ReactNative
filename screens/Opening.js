@@ -27,15 +27,24 @@ export default function Opening({navigation}){
             </View>
             <Animatable.View style={styles.footer} animation='fadeInUpBig'>
                 <Text style={styles.title}>Stay to connect with everyone!</Text>
-                <Text style={styles.text}>Health is the most important</Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.button}>
-                     <LinearGradient
-                     colors={['#00bfff', '#00bfff']}
-                     style={styles.login} >
-                        <Text style={{fontWeight: '500'}}>Get Started</Text>
-                        <MaterialIcons name="navigate-next" size={20} />
-                     </LinearGradient>
-                </TouchableOpacity>    
+                <View>
+                    <TouchableOpacity onPress={() => navigation.navigate('Loading')} style={styles.button1}>
+                        <LinearGradient
+                        colors={['#CECCF5','#0970BE']}
+                        style={styles.login} >
+                            <Text style={styles.textinbutton}>You're client</Text>
+                            <MaterialIcons style={styles.iconnext} color="white" name="navigate-next" size={20} />
+                        </LinearGradient>
+                    </TouchableOpacity>  
+                    <TouchableOpacity onPress={() => navigation.navigate('DoctorLoading')} style={styles.button2}>
+                        <LinearGradient
+                        colors={['#D4919E','#C13815']}
+                        style={styles.login} >
+                            <Text style={styles.textinbutton}>You're doctor</Text>
+                            <MaterialIcons style={styles.iconnext} color="white" name="navigate-next" size={20} />
+                        </LinearGradient>
+                    </TouchableOpacity> 
+                </View> 
             </Animatable.View>
         </SafeAreaView>
     )
@@ -49,7 +58,7 @@ var styles = StyleSheet.create({
         backgroundColor: '#00bfff'
     },
     header: {
-        flex: 2,
+        flex: 1.5,
         justifyContent: 'center',
         alignItems: 'center'
     },
@@ -73,17 +82,31 @@ var styles = StyleSheet.create({
     text: {
         marginTop: 20
     },
-    button: {
-        alignItems: 'flex-end',
+    button1: {
+        alignItems: 'center',
         marginTop: 30
+    },
+    button2: {
+        alignItems: 'center',
+        marginTop: 10
     },
     login: {
         width: 160,
         height: 50,
-        justifyContent: 'center',
+        // justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 40,
+        borderRadius: 10,
         flexDirection: 'row',
-        marginTop: 10
+        marginTop: 10,
+        marginLeft: 15
+    },
+    iconnext: {
+        position: 'absolute',
+        right: 12      
+    },
+    textinbutton: {
+        fontWeight: '500', 
+        color: 'white', 
+        marginLeft: 25
     }
 })

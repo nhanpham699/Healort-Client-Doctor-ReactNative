@@ -9,48 +9,23 @@ import {
     ImageBackground
 } from 'react-native'
 
-import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Entypo, Ionicons, FontAwesome, MaterialIcons } from '@expo/vector-icons'; 
 import * as Animatable from 'react-native-animatable'
 
 
-import Profile from '../screens/Profile'
-import Notification from '../screens/Notification'
-import Bar from '../screens/Bar'
+import Profile from './Profile'
+import Notification from './Notification'
+import Bar from './Bar'
 
-import Flatlist from './MenuFlatList'
+import Flatlist from '../components/DoctorMenu'
 
 const MainScreen = ({navigation}) => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.navigate('CreateProfile')}>
-                    <View style={styles.infor}>
-                        <View style={styles.bginfor}></View>
-                        <View>
-                            <FontAwesome 
-                            name="user-circle" size={40} 
-                            color="black"
-                            style={styles.inforicon} />
-                        </View>
-                        <View style={styles.textinfor}>
-                            <Text
-                            style={{
-                                fontSize: 17,
-                                fontWeight: 'bold',
-                                marginBottom: 5
-                            }}>Personal Information</Text>
-                            <Text>Enter to update</Text>
-                        </View>
-                        <MaterialIcons 
-                        name="navigate-next" 
-                        size={35} 
-                        color="black"
-                        style={{marginLeft: 50, marginTop: 22}} />
-                    </View>
-                </TouchableOpacity>
+               
             </View>
             
             <Animatable.View style={styles.footer} animation='fadeInUpBig'>
@@ -74,7 +49,7 @@ const Tab = createBottomTabNavigator();
 
 
 
-export default function TabMenu(){
+export default function Home(){
     return (
         <Tab.Navigator 
          tabBarOptions={{
@@ -176,3 +151,12 @@ var styles = StyleSheet.create({
         marginLeft: 23        
     }
 })
+
+
+
+
+
+
+  
+  
+  

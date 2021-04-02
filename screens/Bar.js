@@ -18,13 +18,13 @@ import { FontAwesome, AntDesign, Feather } from '@expo/vector-icons';
 export default function Bar({navigation}){
 
     const logout = async () => {
-        const token = await AsyncStorage.getItem('token')
+        const UserToken = await AsyncStorage.getItem('UserToken')
         // console.log(token);
         await axios.get(host + '/users/logout', {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${UserToken}` }
             }).then(async () => {
-                    await AsyncStorage.removeItem('token')
-                    navigation.replace('Login')
+                    await AsyncStorage.removeItem('UserToken')
+                    navigation.replace('Opening')
                 })
     }
 
