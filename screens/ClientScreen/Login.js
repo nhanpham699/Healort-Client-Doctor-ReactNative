@@ -18,10 +18,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons'
 import {EyeOff, Eye} from 'react-native-feather'
 import axios from 'axios'
-import host from '../host'
+import host from '../../host'
 import {useDispatch, useSelector} from 'react-redux'
-import { addDoctorInfor } from '../actions/doctor.infor'
-import { addUser } from '../actions/user'
+import { addDoctorInfor } from '../../actions/doctor.infor'
+import { addUser } from '../../actions/user'
 
 
 export default function Login({navigation}){
@@ -71,7 +71,7 @@ export default function Login({navigation}){
                     <Animatable.Image
                         animation="bounceIn"
                         duration={1500}
-                        source={require('../assets/doctor.png')}
+                        source={require('../../assets/doctor.png')}
                         style={styles.logo}
                         resizeMode={"stretch"}
                     />

@@ -19,8 +19,8 @@ import Profile from './Profile'
 // import Profile from './Profile'
 import Notification from './Notification'
 import Bar from './Bar'
-import DoctorCarousel from '../components/DoctorCarousel'
-import Flatlist from '../components/UserMenu'
+import DoctorCarousel from '../../components/DoctorCarousel'
+import Flatlist from '../../components/UserMenu'
 
 const MainScreen = ({navigation}) => {
     return (

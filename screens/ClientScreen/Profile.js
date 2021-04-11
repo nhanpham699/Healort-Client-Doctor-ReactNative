@@ -18,16 +18,10 @@ import { FontAwesome,Ionicons, AntDesign, Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import RNPickerSelect from "react-native-picker-select";
 import axios from 'axios';
-import host from '../host';
-import {addUser} from '../actions/user'
+import host from '../../host';
+import {addUser} from '../../actions/user'
 import {useDispatch} from 'react-redux'
 import { ModalDatePicker } from "react-native-material-date-picker";
-
-
-
-
-
-
 
 
 export default function Profile({navigation}) {
@@ -88,7 +82,7 @@ export default function Profile({navigation}) {
     
 
     useEffect(() => {
-        console.log(dataUpdate.gender + 'in uffect');
+        // console.log(dataUpdate.gender + 'in uffect');
         (async () => {
           if (Platform.OS !== 'web') {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();

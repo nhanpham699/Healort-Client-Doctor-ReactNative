@@ -17,10 +17,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons'
 import {EyeOff, Eye} from 'react-native-feather'
 import axios from 'axios'
-import host from '../host'
+import host from '../../host'
 import {useDispatch, useSelector} from 'react-redux'
 
-import { addDoctor } from '../actions/doctor'
+import { addDoctor } from '../../actions/doctor'
 
 
 export default function DoctorLogin({navigation}){

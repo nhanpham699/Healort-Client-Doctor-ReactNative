@@ -1,5 +1,5 @@
   
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, Button, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import {
   Container,
@@ -12,28 +12,38 @@ import {
   PostTime,
   MessageText,
   TextSection,
-} from '../styles/messageStyle';
+} from '../../styles/messageStyle';
 import { Ionicons } from '@expo/vector-icons'; 
+import host from '../../host'
+import axios from 'axios'
 
 
 const Messages = [
   {
     id: '1',
     userName: 'Rose',
-    userImg: require('../assets/rose.jpg'),
+    userImg: require('../../assets/rose.jpg'),
     messageTime: '4 mins ago',
     messageText: 'Hey there, this is my test for a post of my social app in React Native.',
   },
   {
     id: '2',
     userName: 'Lisa',
-    userImg: require('../assets/lisa.jpg'),
+    userImg: require('../../assets/lisa.jpg'),
     messageTime: '2 hours ago',
     messageText: 'Hey there, this is my test for a post of my social app in React Native.',
   }
 ];
 
 const MessagesScreen = ({navigation}) => {
+
+    // const [messages, setMessages] = useState([])
+
+    // useEffect(() => {
+    //     axios.get(host + '/doctors/getalldoctors')
+    //     .then(res => setMessages(res.data))
+    // })
+
     return (
       <View style={{flex: 1}}>
           <View style={styles.header}>

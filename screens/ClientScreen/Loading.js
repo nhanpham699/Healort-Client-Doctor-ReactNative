@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, View, AsyncStorage} from 'react-native'
-import {addUser} from '../actions/user'
-import {addDoctorInfor} from '../actions/doctor.infor'
+import {addUser} from '../../actions/user'
+import {addDoctorInfor} from '../../actions/doctor.infor'
 import {useDispatch} from 'react-redux'
-import host from '../host'
+import host from '../../host'
 import axios from 'axios'
 
 export default function Loading({navigation}) {
@@ -19,7 +19,7 @@ export default function Loading({navigation}) {
                     Authorization: `Bearer ${UserToken}`,
                 },
             }).then(async (res) => {
-                const doctors = await axios.get(host + '/doctors/getalldoctors')
+                const doctors = await axios.get(host + '/doctors/gettopdoctor')
                 await dispatch(addDoctorInfor(doctors.data))
                 await dispatch(addUser(res.data.dataSending))
                 navigation.replace('Home')

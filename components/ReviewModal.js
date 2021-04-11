@@ -53,7 +53,7 @@ export default ReviewModal = (props,{navigation}) => {
                 {
                 text: "ok",
                 onPress: async() =>  {
-                    const doctors = await axios.get(host + '/doctors/getalldoctors')
+                    const doctors = await axios.get(host + '/doctors/gettopdoctor')
                     await dispatch(addDoctorInfor(doctors.data))
                     setModal(!modal)
                 },

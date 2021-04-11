@@ -21,6 +21,11 @@ import DoctorLogin from './screens/DoctorScreen/DoctorLogin'
 import DoctorLoading from './screens/DoctorScreen/DoctorLoading'
 import ExamHistory from './screens/ClientScreen/ExamHistory'
 import Chat from './screens/ClientScreen/Chat'
+// import Patient from './screens/DoctorScreen/Patient'
+import Checkout from './screens/ClientScreen/Checkout'
+import DoctorSchedule from './screens/DoctorScreen/DoctorSchedule'
+import ExaminationSlip from './screens/ClientScreen/ExamSlip'
+import Doctor from './screens/ClientScreen/Doctor'
 
 const Stack = createStackNavigator();
 
@@ -38,12 +43,16 @@ const App = () => {
             <Stack.Screen name="Register" component={Register} />   
             <Stack.Screen name="DoctorHome" component={DoctorHome} />           
             <Stack.Screen name="Home" component={Home} />
-            {/* <Stack.Screen name="CreateProfile" component={CreateProfile} /> */}
+            {/* <Stack.Screen name="Patient" component={Patient} /> */}
             <Stack.Screen name="Chat" component={Chat} />
             <Stack.Screen name="MakeaApp" component={MakeaApp} />
             <Stack.Screen name="History" component={ExamHistory} />
             <Stack.Screen name="Message" component={Message} />
             <Stack.Screen name="Schedule" component={Schedule} />
+            <Stack.Screen name="Checkout" component={Checkout} />
+            <Stack.Screen name="DoctorSchedule" component={DoctorSchedule} />
+            <Stack.Screen name="Doctor" component={Doctor} />
+            <Stack.Screen name="ExaminationSlip" component={ExaminationSlip} />
           </Stack.Navigator>
         </NavigationContainer>
       </Provider>    

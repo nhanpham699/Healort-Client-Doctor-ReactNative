@@ -18,9 +18,8 @@ import {useSelector} from 'react-redux'
 import UpdateSchedulesModal from '../../components/UpdateSchedulesModal'
 import ReviewModal from '../../components/ReviewModal'
 
-
-const Schedule = ({navigation}) => {
-  const { user } = useSelector(state => state.users)
+const DoctorSchedule = ({navigation}) => {
+  const { doctor } = useSelector(state => state.doctors)
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [dataUpdate, setDataUpdate] = useState({
@@ -62,8 +61,8 @@ const Schedule = ({navigation}) => {
   }
 
   useEffect(() => {
-      console.log(user.id);
-      axios.get(host + '/schedules/getallschedules/' + user.id)
+    //   console.log(user.id);
+      axios.get(host + '/schedules/getallbydoctor/' + doctor.id)
       .then(res => {
           setData(res.data)
       })
@@ -86,7 +85,7 @@ const Schedule = ({navigation}) => {
                 left={props => <List.Icon {...props} icon="calendar-today" />}
                 >
                 <List.Item style={{marginTop: -10}} title={'Time: ' + sch.begin + ':00'} />
-                <List.Item title={'Doctor: ' + sch.doctorId.fullname} />
+                <List.Item title={'Client name: ' + sch.userId.fullname} />
                 <View style={{flexDirection: 'row', marginBottom: 15}}>
                   <Text style={{fontSize: 15, marginLeft: 7, marginTop: 10}}>Services: </Text>
                 {sch.services.map((ser,index) => (
@@ -97,21 +96,7 @@ const Schedule = ({navigation}) => {
                     </View>
                 ))} 
                 </View>    
-                {sch.status 
-                ? 
-                <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                    <TouchableOpacity onPress={handleReview}>
-                          <View style={[styles.button,{marginRight: 20}]}>
-                              <LinearGradient
-                                  colors={['#D4919E','#C13815']}
-                                  style={styles.update}
-                              >
-                                  <Text style={styles.update_text}>Rate</Text>
-                              </LinearGradient>
-                          </View>
-                    </TouchableOpacity> 
-                </View>
-                :  
+    
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
                   <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.end-sch.begin, sch.doctorId._id)}>
                       <View style={styles.button}>
@@ -134,7 +119,6 @@ const Schedule = ({navigation}) => {
                       </View>
                   </TouchableOpacity> 
                 </View> 
-                }
                 <UpdateSchedulesModal dataUpdate={dataUpdate} modal={modalVisible1} setModal={handleUpdate} /> 
                 <ReviewModal data={sch.doctorId} modal={modalVisible2} setModal={handleReview} /> 
               </List.Accordion>
@@ -186,4 +170,4 @@ var styles = StyleSheet.create({
   },
 })
 
-export default Schedule;
+export default DoctorSchedule;

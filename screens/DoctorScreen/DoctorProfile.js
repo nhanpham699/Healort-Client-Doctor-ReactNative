@@ -29,7 +29,6 @@ export default function Profile({navigation}) {
 
     const { doctor } = useSelector(state => state.doctors)
 
-
     return (
         <KeyboardAvoidingView style={{flex: 1}} behavior="padding">
         <View style={styles.container}>
@@ -52,6 +51,12 @@ export default function Profile({navigation}) {
                         style={styles.infortext} 
                         defaultValue={doctor.fullname} />
                     </View>
+                    <View>
+                        <TextInput 
+                        style={{fontSize: 14, marginTop: 15, fontWeight: '500'}}
+                        editable={false} 
+                        defaultValue="Doctor's Healort dental clinic" />
+                    </View>
                 </View>
             </View>
             <ScrollView style={styles.footer}>
@@ -69,7 +74,7 @@ export default function Profile({navigation}) {
                     <View style={styles.select} >
                         <RNPickerSelect
                             disabled={true}
-                            value={doctor.gender}
+                            value={doctor.gender == 0 ? 'Male' : 'Female'}
                             onValueChange={(value) => console.log(value)}
                             items={[
                                 { label: "Male", value: "Male" },
@@ -99,45 +104,15 @@ export default function Profile({navigation}) {
                     />
                 </View>
                 <View>
-                    <Text style={styles.label}>Province/City</Text>
+                    <Text style={styles.label}>Hometown</Text>
                     <TextInput 
                         editable={false}
-                        defaultValue={doctor.address.city}
+                        defaultValue={doctor.hometown}
                         placeholder="Your email" 
                         style={styles.text_input} 
                         autoCapitalize="none"
                     />
-                </View>
-                <View>
-                    <Text style={styles.label}>District</Text>
-                    <TextInput 
-                        editable={false}
-                        defaultValue={doctor.address.district}
-                        placeholder="Your email" 
-                        style={styles.text_input} 
-                        autoCapitalize="none"
-                    />
-                </View>
-                <View>
-                    <Text style={styles.label}>Commue</Text>
-                    <TextInput 
-                        editable={false}
-                        defaultValue={doctor.address.ward}
-                        placeholder="Your email" 
-                        style={styles.text_input} 
-                        autoCapitalize="none"
-                    />
-                </View>
-                <View style={{paddingBottom: 30}}>
-                    <Text style={styles.label}>Street</Text>
-                    <TextInput
-                        editable={false}
-                        defaultValue={doctor.address.street} 
-                        placeholder="your address" 
-                        style={styles.text_input} 
-                        autoCapitalize="none"
-                        />
-                </View>
+                </View>     
             </ScrollView>
         </View>
         </KeyboardAvoidingView>
@@ -191,9 +166,10 @@ var styles = StyleSheet.create({
     },
     infortextborder: {
         width: 275,
-        height: 40,
+        height: 30,
         borderBottomWidth: 2,
-        borderBottomColor: '#f2f2f2'
+        borderBottomColor: '#f2f2f2',
+        marginTop: 5
     },
     camicon: {
         marginTop: 7,

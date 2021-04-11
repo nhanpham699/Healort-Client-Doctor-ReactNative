@@ -6,11 +6,11 @@ import { NavigationContainer, useNavigation } from "@react-navigation/native";
 
 
 const DATA = [
-  {
-    id: "1",
-    title: "My patients",
-    icon: "plus-square"
-  },
+  // {
+  //   id: "1",
+  //   title: "My patients",
+  //   icon: "plus-square"
+  // },
   {
     id: "2",
     title: "My schedules",
@@ -20,6 +20,16 @@ const DATA = [
     id: "3",
     title: "Chat with client",
     icon: "comment"
+  },
+  {
+    id: "4",
+    title: "Patients Examined",
+    icon: "plus-square"
+  },
+  {
+    id: "5",
+    title: "Re-Examination",
+    icon: "plus-square"
   },
 ];
 
@@ -46,9 +56,11 @@ const Flatlist = ({}) => {
 
   const menuPress = (id) => {
     switch(id) {
-        case '1':  return navigation.navigate('Patient')
+        // case '1':  return navigation.navigate('Patient')
         case '2':  return navigation.navigate('DoctorSchedule')
         case '3':  return navigation.navigate('DoctorChat')
+        case '4':  return navigation.navigate('PatientExamined')
+        case '5':  return navigation.navigate('Re-examination')
     }
   }
 

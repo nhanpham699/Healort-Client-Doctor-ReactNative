@@ -18,7 +18,7 @@ import DoctorProfile from './DoctorProfile'
 import DoctorNotification from './DoctorNotification'
 import DoctorBar from './DoctorBar'
 
-import Flatlist from '../components/DoctorMenu'
+import Flatlist from '../../components/DoctorMenu'
 
 const MainScreen = () => {
     return (

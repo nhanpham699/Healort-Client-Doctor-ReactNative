@@ -17,11 +17,16 @@ const DATA = [
   },
   {
     id: "3",
-    title: "Chat with doctors",
-    icon: "comment"
+    title: "Doctors",
+    icon: "user-md"
   },
   {
     id: "4",
+    title: "Messages",
+    icon: "comment"
+  },
+  {
+    id: "5",
     title: "Examination history    ",
     icon: "star-half-empty"
   }
@@ -52,8 +57,9 @@ const Flatlist = ({}) => {
     switch(id) {
         case '1':  return navigation.navigate('MakeaApp')
         case '2':  return navigation.navigate('Schedule')
-        case '3':  return navigation.navigate('Message')
-        case '4':  return navigation.navigate('ExamHistory')
+        case '3':  return navigation.navigate('Doctor')
+        case '4':  return navigation.navigate('Message')
+        case '5':  return navigation.navigate('ExamHistory')
     }
   }
 

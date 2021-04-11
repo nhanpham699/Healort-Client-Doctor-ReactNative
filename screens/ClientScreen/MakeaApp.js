@@ -11,14 +11,13 @@ import {
     FlatList,
     Alert,
     KeyboardAvoidingView,
-    SafeAreaView
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { FontAwesome, AntDesign, Feather } from '@expo/vector-icons'; 
 import RNPickerSelect from "react-native-picker-select";
 import { Ionicons } from '@expo/vector-icons'; 
 import CheckBox from 'react-native-check-box'
-import host from '../host'
+import host from '../../host'
 import axios from 'axios'
 import {useSelector} from 'react-redux'
 
@@ -88,7 +87,7 @@ const HourItem = ({ item, onPress, style }) => (
 
 export default function MakeaApp({navigation}) {
     const { user } = useSelector(state => state.users)
-
+    
     const [isChecked, setIsChecked] = useState({
         first : false,
         second : false,
@@ -159,7 +158,7 @@ export default function MakeaApp({navigation}) {
         let repeat = []
 
         const scheduleArr = schedules.filter(dt => {
-            return dt.doctorId._id == value
+            return dt.doctorId._id == value && dt.status == 0
         })
 
         for(let sch of scheduleArr){
@@ -222,7 +221,7 @@ export default function MakeaApp({navigation}) {
         }else{
             let arr = hourArr
             const scheduleArr = schedules.filter(dt => {
-                return dt.doctorId._id == data.doctorId
+                return dt.doctorId._id == data.doctorId && dt.status == 0
             })
             setSelectedDateId(item.id)
             setSelectedHourId(null)
@@ -279,22 +278,8 @@ export default function MakeaApp({navigation}) {
         if(!data.date || !data.doctorId || !data.begin || !data.services.length || !data.note){
             alert("Make an appointment failed!!")
         }else{
-            Alert.alert(
-                "Make an appointment",
-                "successfully",
-                [
-                    {
-                    text: "ok",
-                    onPress: () =>  {
-                        axios.post(host + '/schedules/add', data)
-                        .then(() => {
-                            navigation.replace("Schedule")
-                        })
-                    },
-                    style: "cancel",
-                    },
-                ],
-            );                                                                  
+            const dataFilter = {...data, date: data.date.toString().slice(0,15)}
+            navigation.navigate('Checkout', {data: dataFilter})                                                                
         }
         
     }
@@ -366,7 +351,7 @@ export default function MakeaApp({navigation}) {
                                 }}
                                 isChecked={isChecked.first}
 
-                                leftText={"Tooth extraction (1 hour)"}
+                                leftText={"Tooth extraction (100$)"}
                             />
                             <CheckBox
                                 onClick ={()=>{
@@ -381,7 +366,7 @@ export default function MakeaApp({navigation}) {
                                     }else alert("choose time please!")
                                 }}
                                 isChecked={isChecked.second}
-                                leftText={"Fillings (1 hour)"}
+                                leftText={"Fillings (50$)"}
                             />
                             <CheckBox
                                 onClick={()=>{
@@ -396,7 +381,7 @@ export default function MakeaApp({navigation}) {
                                     }else alert("choose time please!")
                                 }}
                                 isChecked={isChecked.third}
-                                leftText={"Dental implants (2 hours)"}
+                                leftText={"Dental implants (500$)"}
                             />
                         </View>  
                         <View>

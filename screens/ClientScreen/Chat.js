@@ -1,103 +1,131 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import {View, ScrollView, Text, Button, StyleSheet} from 'react-native';
+import {View, ScrollView, Text, Button, StyleSheet, TouchableOpacity} from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; 
+
 import {Bubble, GiftedChat, Send} from 'react-native-gifted-chat';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import host from '../host'
+import axios from 'axios'
+import host from '../../host'
 import io from "socket.io-client";
+import { useSelector } from 'react-redux';
 
-const ChatScreen = () => {
-  const [messages, setMessages] = useState([]);
+let socket
 
-  useEffect(() => {
-    const socket = io(host);
-    socket.on("chat message", msg => {
-        setMessages({ messages: [...messages, msg] });
-    });  
-    // setMessages([
-    //   {
-    //     _id: 1,
-    //     text: 'Hello developer',
-    //     createdAt: new Date(),
-    //     user: {
-    //       _id: 2,
-    //       name: 'React Native',
-    //       avatar: 'https://placeimg.com/140/140/any',
-    //     },
-    //   },
-    //   {
-    //     _id: 2,
-    //     text: 'Hello world',
-    //     createdAt: new Date(),
-    //     user: {
-    //       _id: 1,
-    //       name: 'React Native',
-    //       avatar: 'https://placeimg.com/140/140/any',
-    //     },
-    //   },
-    // ]);
-  }, []);
+const ChatScreen = ({navigation,route}) => {
+    const { user } = useSelector(state => state.users)
 
-  const onSend = useCallback((message = []) => {
-    socket.emit('send message', message);  
-    setMessages((previousMessages) =>{
-        return GiftedChat.append(previousMessages, message)
-    });
-  }, []);
+    const [name, setName] = React.useState('');
+    const [room, setRoom] = React.useState('');
+    const [messages, setMessages] = React.useState([]);
 
-  const renderSend = (props) => {
+    useEffect(() => {
+      socket = io(host);
+      const name = user.fullname;
+      const room = route.params.doctorId + '_' + user.id;
+
+      axios.post(host + '/chat/createRoom', {room})
+      axios.get(host + '/chat/showMessages/' + room).then(res => {setMessages(res.data.messages)})
+
+      setName(name)
+      setRoom(room)
+
+      socket.emit('join', { name, room })
+
+      socket.on('message', (message) => {
+        if(message.data[0].user._id !== user.id) {
+          setMessages(previousMessages => GiftedChat.append(previousMessages, message.data[0]))
+        }
+      })
+
+      // return () => {
+      //   socket.emit('disconnect')
+      //   socket.off()
+      // }
+
+    }, []);
+
+    const onSend = useCallback((message = {}) => {
+      socket.emit('sendMessage', message);  
+      setMessages((previousMessages) =>{
+          return GiftedChat.append(previousMessages, message)
+      });
+    }, []);
+
+    const renderSend = (props) => {
+      return (
+        <Send {...props}>
+          <View>
+            <MaterialCommunityIcons
+              name="send-circle"
+              style={{marginBottom: 5, marginRight: 5}}
+              size={32}
+              color="#2e64e5"
+            />
+          </View>
+        </Send>
+      );
+    };
+
+    const renderBubble = (props) => {
+      return (
+        <Bubble
+          {...props}
+          wrapperStyle={{
+            right: {
+              backgroundColor: '#2e64e5',
+            },
+          }}
+          textStyle={{
+            right: {
+              color: '#fff',
+            },
+          }}
+        />
+      );
+    };
+
+    const scrollToBottomComponent = () => {
+      return(
+        <FontAwesome name='angle-double-down' size={22} color='#333' />
+      );
+    }
+
+    // const TitleHeader = () => {
+    //   return (
+    //     <View style={styles.titleHeader}>
+    //       <Text style={styles.titleHeader_text}>
+    //           Doctor {route.params.doctorName}
+    //       </Text>
+    //       <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+    //           <Text style={{ fontWeight: 'bold', color: 'yellow' }}>Doctor</Text>
+    //       </View>
+    //   </View>
+    //   )
+    // }
+
     return (
-      <Send {...props}>
-        <View>
-          <MaterialCommunityIcons
-            name="send-circle"
-            style={{marginBottom: 5, marginRight: 5}}
-            size={32}
-            color="#2e64e5"
-          />
+      <View style={styles.container}>
+        <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Ionicons style={styles.back} name="arrow-back" size={24} color="black" />
+            </TouchableOpacity>
+            <Text style={styles.headertext1}>Chat</Text> 
         </View>
-      </Send>
-    );
-  };
-
-  const renderBubble = (props) => {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          right: {
-            backgroundColor: '#2e64e5',
-          },
+      <GiftedChat
+        messages={messages}
+        onSend={(messages) => onSend(messages)}
+        user={{
+          _id: user.id,
         }}
-        textStyle={{
-          right: {
-            color: '#fff',
-          },
-        }}
+        renderBubble={renderBubble}
+        alwaysShowSend
+        renderSend={renderSend}
+        scrollToBottom
+        scrollToBottomComponent={scrollToBottomComponent}
       />
+      </View>
     );
-  };
-
-  const scrollToBottomComponent = () => {
-    return(
-      <FontAwesome name='angle-double-down' size={22} color='#333' />
-    );
-  }
-
-  return (
-    <GiftedChat
-      messages={messages}
-      onSend={(messages) => onSend(messages)}
-      user={{
-        _id: 1,
-      }}
-      renderBubble={renderBubble}
-      alwaysShowSend
-      renderSend={renderSend}
-      scrollToBottom
-      scrollToBottomComponent={scrollToBottomComponent}
-    />
-  );
 };
 
 export default ChatScreen;
@@ -105,7 +133,37 @@ export default ChatScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+  },
+  header: {
+    backgroundColor: 'white',
+    flexDirection: 'row',
+    height: 65,
+  },
+  headertext1: {
+      flex: 1,
+      lineHeight: 80,
+      fontSize: 18,
+      marginRight: 35,
+      textAlign: 'center',
+      fontWeight: '500'
+  },
+  back: {
+      marginTop: 28,
+      marginLeft: 15
+  },
+  titleHeader: {
+    flex: 1,
+    // backgroundColor: '#000',
     justifyContent: 'center',
+    textAlign: 'center',
+    alignItems: 'center',
+    paddingRight: 5,
+  },
+
+  titleHeader_text: {
+      fontSize: 15,
+      fontWeight: 'bold',
+      color: '#fff',
+      paddingLeft: 15,    
   },
 });

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { View } from "react-native"
+import { TouchableOpacity, View } from "react-native"
+
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import CarouselCardItem, { SLIDER_WIDTH, ITEM_WIDTH } from './DoctorCarouselCardItem'
 import host from '../host'
@@ -35,31 +36,33 @@ const ratingTotal = (rate) => {
 const DoctorCarousel = () => {
     const { doctors } = useSelector(state => state.doctorInfor)
 
-
+    
+    // console.log(user);
     const isCarousel = React.useRef(null)
     const [data,setData] = useState([])
 
     useEffect(() => {
-        const dataFilter = doctors.map(dt => {
+        let dataFilter = doctors.map(dt => {
             return {...dt, review: ratingTotal(dt.review)}
         })
+        // dataFilter.push(user)
         setData(dataFilter)
     },[doctors])
   
     // // console.log(data);
     return (
         <View>
-        <Carousel
-            layout="tinder"
-            layoutCardOffset={9}
-            ref={isCarousel}
-            data={data}
-            renderItem={CarouselCardItem}
-            sliderWidth={SLIDER_WIDTH}
-            itemWidth={ITEM_WIDTH}
-            // onSnapToItem={(index) => setIndex(index)}
-            useScrollView={true}
-        />
+            <Carousel
+                layout="tinder"
+                layoutCardOffset={9}
+                ref={isCarousel}
+                data={data}
+                renderItem={CarouselCardItem}
+                sliderWidth={SLIDER_WIDTH}
+                itemWidth={ITEM_WIDTH}
+                // onSnapToItem={(index) => setIndex(index)}
+                useScrollView={true}
+            />
         </View>
     )
 }

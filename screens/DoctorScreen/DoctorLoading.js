@@ -1,9 +1,9 @@
 
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, View, AsyncStorage} from 'react-native'
-import {addDoctor} from '../actions/doctor'
+import {addDoctor} from '../../actions/doctor'
 import {useDispatch} from 'react-redux'
-import host from '../host'
+import host from '../../host'
 import axios from 'axios'
 
 export default function DoctorLoading({navigation}) {

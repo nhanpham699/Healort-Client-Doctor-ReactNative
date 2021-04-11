@@ -98,7 +98,8 @@ export default UpdateSchedulesModal = (props,{navigation}) => {
           let dataFilter = res.data.filter(dt => {
               return ((new Date(dt.date)).toString().slice(0,15)) == data.date
                     && dt.doctorId._id == dataUpdate.doctorId
-                    && data.begin == dt.begin 
+                    && data.begin == dt.begin
+                    && dt.status == 0 
           })
           // console.log(data.date, data.begin);
           if(dataFilter.length || data.date == null || data.begin == 0 ){

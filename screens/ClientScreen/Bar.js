@@ -10,7 +10,7 @@ import {
     ScrollView,
     ImageBackground
 } from 'react-native'
-import host from '../host'
+import host from '../../host'
 import axios from 'axios'
 import { FontAwesome, AntDesign, Feather } from '@expo/vector-icons'; 
 
@@ -30,7 +30,7 @@ export default function Bar({navigation}){
 
     return (
         <View style={styles.container}>
-            <ImageBackground source={require('../assets/bg.jpg')} style={styles.header}>
+            <ImageBackground source={require('../../assets/bg.jpg')} style={styles.header}>
                 <FontAwesome style={styles.profile} name="user-circle-o" size={75} color="black" /> 
                 <Text style={styles.name}>Pham Phuoc Nhan</Text>
             </ImageBackground>
