@@ -14,35 +14,26 @@ import { LinearGradient } from 'expo-linear-gradient'
 import host from '../../host'
 import { List } from 'react-native-paper';
 import axios from 'axios';
-import {useSelector} from 'react-redux'
-import UpdateSchedulesModal from '../../components/UpdateSchedulesModal'
-import ReviewModal from '../../components/ReviewModal'
+import {useSelector, useDispatch} from 'react-redux'
+import {addDoctorInfor} from '../../actions/doctor.infor'
 
 
 const Schedule = ({navigation}) => {
-  const { user } = useSelector(state => state.users)
-  const [modalVisible1, setModalVisible1] = useState(false);
-  const [modalVisible2, setModalVisible2] = useState(false);
-  const [dataUpdate, setDataUpdate] = useState({
-      id : null,
-      time: 0,
-      doctorId: null,
-  })
 
-  
+  const dispatch = useDispatch()
+  const { user } = useSelector(state => state.users)
   const [data, setData] = useState([])
 
   
-  const handleUpdate = (id, time, doctorId) => {
-     setDataUpdate({
-        id: id,
-        time: time,
-        doctorId: doctorId
-     })
-     setModalVisible1(!modalVisible1)
-  }
+  const handleUpdate = (id, doctorName, doctorId) => {
+    navigation.navigate("UpdateSchedules", {
+      id: id, 
+      doctorName: doctorName, 
+      doctorId: doctorId, 
+      actor: 'user'
+    })
+ }
 
-  const handleReview = () => setModalVisible2(!modalVisible2)
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -54,20 +45,62 @@ const Schedule = ({navigation}) => {
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "OK", onPress: () => {
-            axios.post(host + "/schedules/delete", {id: id})
+        { text: "OK", onPress: async() => {
+            await axios.post(host + "/schedules/delete", {id: id})
+            const currentSchedule = data.filter(dt => dt._id == id)
+            const doctor = currentSchedule[0].doctorId
+            const dataSaved = {
+                sender: 'user',
+                userId : user.id,
+                doctorId: doctor._id,
+                title: 'Delete the schedule',
+                body: user.fullname + ' deleted the schedule! Please check your schedule!',
+                date: new Date()
+            }
+            const doctors = await axios.get(host + '/doctors/gettopdoctor')
+            await dispatch(addDoctorInfor(doctors.data))
+
+            for(var token of doctor.tokens){
+                await sendPushNotification(token.tokenDevices);
+            }
+
+            await axios.post(host + '/notifications/add', dataSaved)
+            getAllSchedules()
         } }
       ]
     );
   }
 
+  const getAllSchedules = async() => {
+    const res = await axios.get(host + '/schedules/getallschedules/' + user.id)
+    const newData = res.data.filter(dt => dt.status === 0)
+    setData(newData)
+  }
+
   useEffect(() => {
-      console.log(user.id);
-      axios.get(host + '/schedules/getallschedules/' + user.id)
-      .then(res => {
-          setData(res.data)
-      })
+      getAllSchedules()
   },[])
+
+  async function sendPushNotification(expoPushToken) {
+    const message = {
+      to: expoPushToken,
+      sound: 'default',
+      title: 'Delete the schedule',
+      body: user.fullname + ' deleted the schedule! Please check your schedule!',
+      data: { someData: 'goes here' },
+    };
+    
+
+    await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(message),
+    });
+  }
 
   return (
     <View style={styles.container}>
@@ -87,8 +120,11 @@ const Schedule = ({navigation}) => {
                 >
                 <List.Item style={{marginTop: -10}} title={'Time: ' + sch.begin + ':00'} />
                 <List.Item title={'Doctor: ' + sch.doctorId.fullname} />
+                <TouchableOpacity onPress={() => navigation.navigate('ShowExamSlip',{schedule: sch})}>
+                  <Text style={styles.link} >My examination slip</Text>
+                </TouchableOpacity>
                 <View style={{flexDirection: 'row', marginBottom: 15}}>
-                  <Text style={{fontSize: 15, marginLeft: 7, marginTop: 10}}>Services: </Text>
+                  <Text style={{fontSize: 16, marginLeft: 7, marginTop: 14}}>Services: </Text>
                 {sch.services.map((ser,index) => (
                     <View key={index} >
                       {(ser == 0) && <Text style={styles.servicetext}>Tooth extraction</Text>}
@@ -97,23 +133,9 @@ const Schedule = ({navigation}) => {
                     </View>
                 ))} 
                 </View>    
-                {sch.status 
-                ? 
+              
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                    <TouchableOpacity onPress={handleReview}>
-                          <View style={[styles.button,{marginRight: 20}]}>
-                              <LinearGradient
-                                  colors={['#D4919E','#C13815']}
-                                  style={styles.update}
-                              >
-                                  <Text style={styles.update_text}>Rate</Text>
-                              </LinearGradient>
-                          </View>
-                    </TouchableOpacity> 
-                </View>
-                :  
-                <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                  <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.end-sch.begin, sch.doctorId._id)}>
+                  <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.doctorId.fullname, sch.doctorId._id)}>
                       <View style={styles.button}>
                           <LinearGradient
                               colors={['#CECCF5','#0970BE']}
@@ -134,9 +156,7 @@ const Schedule = ({navigation}) => {
                       </View>
                   </TouchableOpacity> 
                 </View> 
-                }
-                <UpdateSchedulesModal dataUpdate={dataUpdate} modal={modalVisible1} setModal={handleUpdate} /> 
-                <ReviewModal data={sch.doctorId} modal={modalVisible2} setModal={handleReview} /> 
+                
               </List.Accordion>
             ))}
           </List.Section>
@@ -166,9 +186,16 @@ var styles = StyleSheet.create({
       marginTop: 28,
       marginLeft: 15
   },
+  link: {
+    marginLeft: 7,
+    fontSize: 16,
+    marginVertical: 15,
+    color: '#00aaff',
+    textDecorationLine: 'underline'
+  },
   servicetext: {
-    marginTop: 10,
-    fontSize: 15
+    marginTop: 14,
+    fontSize: 16
   },
   update: {
     borderColor: '#00bfff',

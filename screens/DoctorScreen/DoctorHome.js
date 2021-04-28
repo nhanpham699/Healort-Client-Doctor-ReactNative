@@ -6,7 +6,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     StatusBar,
-    ImageBackground
+    Image
 } from 'react-native'
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -25,7 +25,9 @@ const MainScreen = () => {
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <View style={styles.header}>
-               
+                <Image 
+                source={require('../../assets/dentist.png')}
+                style={{width: 700, height: 300, marginTop: 100}} />  
             </View>
             <Animatable.View style={styles.footer} animation='fadeInUpBig'>
                     <View style={{
@@ -108,17 +110,17 @@ var styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: '#ff8080'
+        backgroundColor: '#44A08D'
     },
     header: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingTop: 15,
-        backgroundColor: '#ff8080'	
+        backgroundColor: '#44A08D'	
     },
     footer: {
-        flex: 2,
+        flex: 1.5,
         backgroundColor: 'white',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,

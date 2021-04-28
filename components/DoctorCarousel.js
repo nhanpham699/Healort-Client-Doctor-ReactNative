@@ -1,29 +1,14 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { TouchableOpacity, View } from "react-native"
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from "react-native"
+import Carousel from 'react-native-snap-carousel'
+import { Feather } from '@expo/vector-icons'; 
 
-import Carousel, { Pagination } from 'react-native-snap-carousel'
-import CarouselCardItem, { SLIDER_WIDTH, ITEM_WIDTH } from './DoctorCarouselCardItem'
 import host from '../host'
-import {useSelector} from 'react-redux'
 
-// const data = [
-//     {
-//       title: "Aenean leo",
-//       body: "Ut tincidunt tincidunt erat. Sed cursus turpis vitae tortor. Quisque malesuada placerat nisl. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.",
-//       imgUrl: DentistIcon
-//     },
-//     {
-//       title: "In turpis",
-//       body: "Aenean ut eros et nisl sagittis vestibulum. Donec posuere vulputate arcu. Proin faucibus arcu quis ante. Curabitur at lacus ac velit ornare lobortis. ",
-//       imgUrl: DentistIcon
-//     },
-//     {
-//       title: "Lorem Ipsum",
-//       body: "Phasellus ullamcorper ipsum rutrum nunc. Nullam quis ante. Etiam ultricies nisi vel augue. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc.",
-//       imgUrl: DentistIcon
-//     }
-//   ]
+const SLIDER_WIDTH = Dimensions.get('window').width + 100
+const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7)
+
 
 const ratingTotal = (rate) => {
     let total = 0
@@ -33,32 +18,60 @@ const ratingTotal = (rate) => {
     return total
 }
 
-const DoctorCarousel = () => {
-    const { doctors } = useSelector(state => state.doctorInfor)
+const DoctorCarousel = (props) => {
 
-    
-    // console.log(user);
+    const { onPress, doctorChecked } = props
     const isCarousel = React.useRef(null)
     const [data,setData] = useState([])
 
-    useEffect(() => {
-        let dataFilter = doctors.map(dt => {
+    const getdoctors = async() => {
+        const res = await axios.get(host + '/doctors/getbaddoctor')
+        const dataFilter = res.data.map(dt => {
             return {...dt, review: ratingTotal(dt.review)}
         })
-        // dataFilter.push(user)
         setData(dataFilter)
-    },[doctors])
+    }
+
+    useEffect(() => {
+        getdoctors()
+    },[])
   
-    // // console.log(data);
+    
+    const CarouselCardItem = ({ item, index }) => {
+        return (
+          <TouchableOpacity  onPress={() => onPress(item._id)}>
+            <View style={styles.container} key={index}>
+                <Image
+                  source={{uri : host + item.avatar}}
+                  style={styles.image}
+                />
+                <View style={{marginTop: 10}}>
+                  <Text style={styles.text}>Name:  {item.fullname}</Text>
+                  <Text style={styles.text}>Gender:  {Number(item.gender) ? 'Female' : 'Male'}</Text>
+                  <Text style={styles.text}>Birth Year:  {item.birthyear}</Text>
+                  <Text style={styles.text}>Phone:  {item.phone}</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.text}>Experience:  {item.experience} years</Text>
+                      {(doctorChecked.id == item._id && doctorChecked.isChecked) 
+                        ? <Feather style={{marginLeft: 40}} name="check-circle" size={30} color="green" />
+                        : <Feather style={{marginLeft: 40}} name="check-circle" size={24} color="black" /> }
+                  </View>
+                </View>
+            </View>
+         </TouchableOpacity>
+        )
+      }
+
+
     return (
         <View>
             <Carousel
-                layout="tinder"
+                layout="default"
                 layoutCardOffset={9}
                 ref={isCarousel}
                 data={data}
                 renderItem={CarouselCardItem}
-                sliderWidth={SLIDER_WIDTH}
+                sliderWidth={410}
                 itemWidth={ITEM_WIDTH}
                 // onSnapToItem={(index) => setIndex(index)}
                 useScrollView={true}
@@ -67,6 +80,39 @@ const DoctorCarousel = () => {
     )
 }
 
-
+const styles = StyleSheet.create({
+    container: {
+      height: 150,
+      flexDirection: 'row',
+      backgroundColor: 'white',
+      borderRadius: 8,
+      width: ITEM_WIDTH,
+      paddingLeft: 10,
+      paddingVertical: 10,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 3,
+      },
+      shadowOpacity: 0.29,
+      shadowRadius: 4.65,
+      elevation: 7,
+      marginVertical: 20
+    },
+    image: {
+      width: ITEM_WIDTH-250,
+      height: 110,
+      resizeMode: 'stretch',
+      marginTop: 12,
+      marginLeft: 5,
+      borderRadius: 5
+    },
+    text: {
+        marginLeft: 15,
+        marginTop: 5,
+        fontSize: 14,
+        fontWeight: '500'
+    }
+  })
 
 export default DoctorCarousel

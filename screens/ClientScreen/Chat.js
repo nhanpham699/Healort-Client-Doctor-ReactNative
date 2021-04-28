@@ -10,17 +10,17 @@ import host from '../../host'
 import io from "socket.io-client";
 import { useSelector } from 'react-redux';
 
-let socket
-
 const ChatScreen = ({navigation,route}) => {
     const { user } = useSelector(state => state.users)
+
+    const socket = io(host);
+
 
     const [name, setName] = React.useState('');
     const [room, setRoom] = React.useState('');
     const [messages, setMessages] = React.useState([]);
 
     useEffect(() => {
-      socket = io(host);
       const name = user.fullname;
       const room = route.params.doctorId + '_' + user.id;
 
@@ -38,10 +38,15 @@ const ChatScreen = ({navigation,route}) => {
         }
       })
 
-      // return () => {
-      //   socket.emit('disconnect')
-      //   socket.off()
-      // }
+     
+      // console.log(a);
+      const unsubscribe = navigation.addListener('beforeRemove', () => {
+        socket.emit('dis');
+        socket.off()
+      });
+  
+      return unsubscribe;
+
 
     }, []);
 
@@ -117,6 +122,9 @@ const ChatScreen = ({navigation,route}) => {
         onSend={(messages) => onSend(messages)}
         user={{
           _id: user.id,
+          name: user.name,
+          avatar: user.avatar
+
         }}
         renderBubble={renderBubble}
         alwaysShowSend

@@ -78,36 +78,25 @@ const HourItem = ({ item, onPress, style }) => (
 
 
 
-export default function MakeaApp({navigation, route}) {
+export default function ReExam({navigation, route}) {
 
-    const doctorId = route.params ? route.params.doctorId : null
-    const { user } = useSelector(state => state.users)
-    const [isChecked, setIsChecked] = useState({
-        first : false,
-        second : false,
-        third : false
-    })
-
+    const { doctor, userId, scheduleId } = route.params 
     const [dateArr, setDateArr] = useState(DATE_DATA)
     const [hourArr, setHourArr] = useState(HOUR_DATA)
     const [schedules, setSchedules] = useState([])
-
     const [selectedHourId, setSelectedHourId] = useState(null);
     const [selectedDateId, setSelectedDateId] = useState(null);
     const [data, setData] = useState({
         date: null,
         begin: 0,
-        services: [],
-        doctorId: doctorId,
+        total: 0,
+        doctorId: doctor._id,
+        scheduleId: scheduleId,
         note: null,
-        userId: user.id,
-        status: 0
+        userId: userId,
+        status: 0,
+        times: null
     })    
-    const [doctorChecked, setDoctorChecked] = useState({
-        id : doctorId,
-        isChecked: doctorId ? true : false
-    })
-
 
     const renderDateItem = ({ item }) => {
         
@@ -147,17 +136,13 @@ export default function MakeaApp({navigation, route}) {
         );
     };
     
-    const chooseDoctor = (value) => {
-        setDoctorChecked({
-            id: value,
-            isChecked: true
-        })
+    const handleCheckDate = (schedule) => {
         setDateArr(DATE_DATA)
         let arr = DATE_DATA
         let repeat = []
 
-        const scheduleArr = schedules.filter(dt => {
-            return dt.doctorId._id == value && dt.status == 0
+        const scheduleArr = schedule.filter(dt => {
+            return dt.doctorId._id == doctor._id && dt.status == 0
         })
 
         for(let sch of scheduleArr){
@@ -196,25 +181,13 @@ export default function MakeaApp({navigation, route}) {
             }
         }       
         setHourArr(HOUR_DATA)
-        setIsChecked({
-            first: false,
-            second: false,
-            third: false
-        })
-        setData({...data, date: null, begin: 0, services: [], doctorId: value})
-        setSelectedDateId(null)
-        setSelectedHourId(null)
     }
+
 
     
 
     const getDate = (item) => {
         setHourArr(HOUR_DATA)
-        setIsChecked({
-            first: false,
-            second: false,
-            third: false
-        })
         if(!data.doctorId){
             alert("please choose a doctor!")
         }else{
@@ -224,7 +197,7 @@ export default function MakeaApp({navigation, route}) {
             })
             setSelectedDateId(item.id)
             setSelectedHourId(null)
-            setData({...data, date: item.value, begin: 0, services: []})
+            setData({...data, date: item.value, begin: 0})
             for(let sch of scheduleArr) {
                  if(new Date(sch.date).toString().slice(0,15) == item.value.toString().slice(0,15)){
                     for(var i=0 ; i< hourArr.length;i++){ 
@@ -244,35 +217,48 @@ export default function MakeaApp({navigation, route}) {
     }    
     // Hour
     const getHour = (item) => {
-        setIsChecked({
-            first: false,
-            second: false,
-            third: false
-        })
         if(!data.date){
             alert("you haven't chosen a date yet!")
         }else{
-            setData({...data, begin : item.value, services: []})
+            setData({...data, begin : item.value })
             setSelectedHourId(item.id)             
         }
     }
 
     useEffect(() => {
 
-        axios.get(host + '/schedules/getallschedules')
+        axios.get(host + '/schedules/getallschedules/')
         .then(res => {
             setSchedules(res.data)
-        })        
+            handleCheckDate(res.data)
+        })         
 
     },[])
 
     const make = async() => {
         
-        if(!data.date || !data.doctorId || !data.begin || !data.services.length || !data.note){
+        if(!data.date || !data.doctorId || !data.begin || !data.note){
             alert("Make an appointment failed!!")
         }else{
-            const dataFilter = {...data, date: data.date.toString().slice(0,15)}
-            navigation.navigate('Checkout', {data: dataFilter})                                                                
+            const newData = {
+                ...data,
+                total: Number(data.total),
+                times: Number(data.times)
+            }
+            await axios.post(host + '/reexams/add', newData)
+            .then(async() => {
+                await axios.post(host + '/schedules/updateReexam', {id: data.scheduleId})
+                Alert.alert(
+                    "Successfully",
+                    "Make an appointment succussfully",
+                    [
+                      { text: "OK", onPress: () => {
+                            navigation.pop(1)
+                            navigation.replace('DoctorSchedule')
+                        }}
+                    ]
+                );
+            })                              
         }
         
     }
@@ -288,13 +274,11 @@ export default function MakeaApp({navigation, route}) {
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Ionicons style={styles.back} name="arrow-back" size={24} color="black" />
                     </TouchableOpacity>
-                    <Text style={styles.headertext1}>Make an appointment</Text> 
+                    <Text style={styles.headertext1}>Re-Examination</Text> 
                 </View>
                 <ScrollView>
                     <View style={styles.content}>
-                        <Text style={styles.choose}>Choose Doctors</Text>  
-                        <DoctorCarousel onPress={chooseDoctor} doctorChecked={doctorChecked}/>
-                        <Text style={[styles.choose, {marginTop: 20}]}>Choose Date/Hours of examination</Text>
+                        <Text style={styles.choose}>Doctor {doctor.fullname}</Text>  
                         <Text style={styles.radiotitle}>DATE</Text>
                         <View style={styles.flatlist}>
                             <FlatList
@@ -322,55 +306,26 @@ export default function MakeaApp({navigation, route}) {
                         </View>  
                     </View>
                     <View style={styles.footer}>
-                        <Text style={styles.choose}>Choose services</Text>  
-                        <View style={styles.checkboxs}>
-                            <CheckBox
-                                onClick={()=>{
-                                    if(data.begin){
-                                        const index = data.services.indexOf(0)
-                                        if(index >= 0){
-                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                                        }else{  
-                                            setData({...data, services: [...data.services, 0]})
-                                        }
-                                        setIsChecked({...isChecked, first : !isChecked.first})
-                                    }else alert("choose time please!")
-                                }}
-                                isChecked={isChecked.first}
-
-                                leftText={"Tooth extraction (100$)"}
-                            />
-                            <CheckBox
-                                onClick ={()=>{
-                                    if(data.begin){
-                                        const index = data.services.indexOf(1)
-                                        if(index >= 0) {
-                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                                        }else{
-                                            setData({...data, services: [...data.services, 1]})
-                                        }
-                                        setIsChecked({...isChecked, second : !isChecked.second})
-                                    }else alert("choose time please!")
-                                }}
-                                isChecked={isChecked.second}
-                                leftText={"Fillings (50$)"}
-                            />
-                            <CheckBox
-                                onClick={()=>{
-                                    if(data.begin){
-                                        const index = data.services.indexOf(2)
-                                        if(index >= 0){ 
-                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                                        }else{
-                                            setData({...data, services: [...data.services, 2]})
-                                        }
-                                        setIsChecked({...isChecked, third : !isChecked.third})
-                                    }else alert("choose time please!")
-                                }}
-                                isChecked={isChecked.third}
-                                leftText={"Dental implants (500$)"}
-                            />
-                        </View>  
+                        <View>
+                            <Text style={styles.choose}>Examination time</Text>
+                            <View style={{paddingHorizontal: 15}}>
+                                <TextInput 
+                                placeholder="   time" 
+                                style={styles.text_input} 
+                                autoCapitalize="none"
+                                onChangeText={value => setData({...data, times: value})} />
+                            </View>
+                        </View>
+                        <View>
+                            <Text style={styles.choose}>Price total</Text>
+                            <View style={{paddingHorizontal: 15}}>
+                                <TextInput 
+                                placeholder="   price" 
+                                style={styles.text_input} 
+                                autoCapitalize="none"
+                                onChangeText={value => setData({...data, price: value})} />
+                            </View>
+                        </View>
                         <View>
                             <Text style={styles.choose}>Note</Text>
                             <View style={{paddingHorizontal: 15}}>
@@ -423,12 +378,12 @@ var styles = StyleSheet.create({
     content: {
         backgroundColor: 'white',
         marginTop: 20,
-        height: 500
+        height: 270
     },
     footer:{
         backgroundColor: 'white',
         marginTop: 20, 
-        // flex: 2
+        height: 360
     },  
     choose:{
         fontSize: 17,
@@ -490,24 +445,3 @@ var styles = StyleSheet.create({
         fontSize: 14,
     },
 })
-
-const pickerSelectStyles = StyleSheet.create({
-    inputIOS: {
-        width: 367,
-        height: 40,
-        borderRadius: 6,
-        marginLeft: 20,
-        marginTop: 10,
-        backgroundColor: '#f2f2f2',
-        paddingLeft: 10
-    },
-    inputAndroid: {
-        width: 367,
-        height: 40,
-        borderRadius: 6,
-        marginLeft: 20,
-        marginTop: 10,
-        backgroundColor: '#f2f2f2',
-        paddingLeft: 10
-    },
-});

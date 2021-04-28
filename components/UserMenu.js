@@ -27,8 +27,13 @@ const DATA = [
   },
   {
     id: "5",
-    title: "Examination history    ",
+    title: "Examination history",
     icon: "star-half-empty"
+  },
+  {
+    id: "6",
+    title: "Re-Examination",
+    icon: "plus-square"
   }
 ];
 
@@ -60,6 +65,7 @@ const Flatlist = ({}) => {
         case '3':  return navigation.navigate('Doctor')
         case '4':  return navigation.navigate('Message')
         case '5':  return navigation.navigate('ExamHistory')
+        case '6':  return navigation.navigate('ReExamList')
     }
   }
 

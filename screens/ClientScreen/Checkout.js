@@ -12,8 +12,15 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'; 
 import axios from 'axios';
 import host from '../../host';
+import {useDispatch, useSelector} from 'react-redux'
+import {addDoctorInfor} from '../../actions/doctor.infor'
+
 
 export default function Checkout({navigation, route}){
+
+    const { user } = useSelector(state => state.users)
+
+    const dispatch = useDispatch()
     const [dataCheckOut, setDataCheckOut] = useState({})
     const [doctor, setDoctor] = useState({})
     const [total, setTotal] = useState(0)
@@ -44,14 +51,52 @@ export default function Checkout({navigation, route}){
                 "Make an appointment",
                 "Successfully",
                 [
-                  { text: "OK", onPress: () => {
+                  { text: "OK", onPress: async() => {
+                        const dataSaved = {
+                            sender: 'user',
+                            userId : data.userId,
+                            doctorId: doctor._id,
+                            title: 'Make an appoinment',
+                            body: user.fullname + ' maked an appoinment for you!',
+                            date: new Date()
+                        }
+                        const doctors = await axios.get(host + '/doctors/gettopdoctor')
+                        await dispatch(addDoctorInfor(doctors.data))
+                        await axios.post(host + '/notifications/add', dataSaved)
+                        for(var token of doctor.tokens){
+                            await sendPushNotification(token.tokenDevices, user.fullname);
+                        }
+
                         const dataFilter = {...dataCheckOut, date: dataCheckOut.date.toString().slice(0,15)}
-                      navigation.navigate('ExaminationSlip', {data: dataFilter})
+                        navigation.navigate('ExaminationSlip', {data: dataFilter, doctor: doctor})
+                        
                     }}
                 ]
               );
         })
     }
+
+    async function sendPushNotification(expoPushToken, username) {
+        const message = {
+          to: expoPushToken,
+          sound: 'default',
+          title: 'Make an appoinment',
+          body: username + ' maked an appoinment for you!',
+          data: { someData: 'goes here' },
+        };
+        
+
+        await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+        });
+      }
+      
 
     return (
         <View style={styles.container}>
@@ -65,7 +110,7 @@ export default function Checkout({navigation, route}){
                 <View style={{flexDirection: 'row'}}>
                     <View style={{width: '50%'}}>
                         <Image 
-                        source={require('../../assets/doctor2.png')} 
+                        source={{uri : host + doctor.avatar}} 
                         style={styles.doctorLogo} />
                     </View>
                     <View style={styles.doctorInfor}>
@@ -75,6 +120,7 @@ export default function Checkout({navigation, route}){
                             <Text style={styles.doctorInfor_text}><Text style={{fontWeight: '700'}}>Gender:</Text>  {doctor.gender ? 'Male' : 'fale'}</Text>
                             <Text style={styles.doctorInfor_text}><Text style={{fontWeight: '700'}}>Hometown:</Text>  {doctor.hometown}</Text>
                             <Text style={styles.doctorInfor_text}><Text style={{fontWeight: '700'}}>Phone:</Text>  {doctor.phone}</Text>
+                            <Text style={styles.doctorInfor_text}><Text style={{fontWeight: '700'}}>Experience:</Text>  {doctor.experience} years</Text>
                         </View>
                     </View>   
                 </View>  
@@ -114,10 +160,10 @@ export default function Checkout({navigation, route}){
                         <TouchableOpacity onPress={handleCheckOut}>
                             <View style={styles.button}>
                                 <LinearGradient
-                                    colors={['#D4919E','#C13815']}
+                                    colors={['#99ffff', '#80ffff']}
                                     style={styles.make}
                                 >
-                                    <Text style={styles.make_text}>Check out</Text>
+                                    <Text style={styles.make_text}>Confirm</Text>
                                 </LinearGradient>
                             </View>
                         </TouchableOpacity> 
@@ -153,42 +199,36 @@ var styles = StyleSheet.create({
         marginTop: 20,
         // width: '100%',
         backgroundColor: 'white',
-        flex: 1.5,
-        paddingHorizontal: 15
+        flex: 1.1,
+        paddingHorizontal: 20,
+        paddingTop: 15
     },
     footer: {
+        paddingHorizontal: 20,
         flex: 2,
         backgroundColor: 'white',
         marginTop: 20
     },
     doctorLogo: {
-        marginTop: 20,
-        width: 180,
-        height: 220,
-        // resizeMode: 'stretch',
+        marginTop: 10,
+        width: 170,
+        height: 165,
+        borderRadius: 5,
+        resizeMode: 'stretch',
     },
     doctorInfor: {
-        width: '50%',
+        width: '55%',
         justifyContent: 'center',
         alignItems: 'center'
     },
     doctorInfor_text: {
         fontWeight: '500',
         fontSize: 15,
-        marginTop: 10
+        marginTop: 10,
     },
     footer_header: {
         backgroundColor: "white",
-        borderRadius: 10,
-        elevation: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.5,
-        shadowRadius: 5,
-        margin: 40,
-        paddingHorizontal: 30,
-        paddingTop: 5,
-        paddingBottom: 15
+        padding: 20
     },
     footer_component:{
         flexDirection: 'row'
@@ -198,6 +238,7 @@ var styles = StyleSheet.create({
         marginTop: 14
     },
     service_text:{
+        textAlign: 'right',
         fontSize: 14,
         marginTop: 3
     },
@@ -205,11 +246,13 @@ var styles = StyleSheet.create({
         width: '44%'
     },
     footer_right:{
-        width: '56%',      
+        width: '56%',
+        textAlign: 'right'      
     },
     footer_title: {
         color: 'black',
-        fontWeight: '600'
+        fontWeight: '500',
+        fontSize: 16
     },
     make: {
         borderColor: '#00bfff',
@@ -218,7 +261,7 @@ var styles = StyleSheet.create({
         height: 50,
         width: '70%',
         borderRadius: 10,
-        marginBottom: 40
+        marginVertical: 25
     },
     make_text: {
         color: 'rgba(0, 0, 0, 0.7)',

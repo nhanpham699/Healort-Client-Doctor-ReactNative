@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, Dimensions, Image,  TouchableOpacity, Touchable } from "react-native"
+import { View, Text, StyleSheet, Dimensions, Image } from "react-native"
 import { FontAwesome, AntDesign, Feather } from '@expo/vector-icons'; 
-import {useSelector} from 'react-redux'
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import host from '../host';
 
-const DentistIcon = require('../assets/dentist.png')
 
 export const SLIDER_WIDTH = Dimensions.get('window').width + 80
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7)
 
 
-const CarouselCardItem = ({ item, index }) => {
+const TopCarouselCardItem = ({ item, index }) => {
 
 
 
@@ -20,7 +18,7 @@ const CarouselCardItem = ({ item, index }) => {
 
       <View style={styles.container} key={index}>
         <Image
-          source={DentistIcon}
+          source={{uri : host + item.avatar}}
           style={styles.image}
         />
         <View style={{marginTop: 10}}>
@@ -60,11 +58,16 @@ const styles = StyleSheet.create({
     elevation: 7,
   },
   image: {
-    width: ITEM_WIDTH-220,
-    height: 250,
+    width: ITEM_WIDTH-235,
+    height: 110,
+    resizeMode: 'stretch',
+    marginTop: 12,
+    marginLeft: 5,
+    borderRadius: 5
   },
   text: {
-      marginTop: 6,
+      marginLeft: 15,
+      marginTop: 5,
       fontSize: 14,
       fontWeight: '500'
   },
@@ -85,4 +88,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default CarouselCardItem
+export default TopCarouselCardItem

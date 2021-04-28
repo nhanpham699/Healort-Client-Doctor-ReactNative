@@ -19,38 +19,15 @@ import Profile from './Profile'
 // import Profile from './Profile'
 import Notification from './Notification'
 import Bar from './Bar'
-import DoctorCarousel from '../../components/DoctorCarousel'
+import TopDoctorCarousel from '../../components/TopDoctorCarousel'
 import Flatlist from '../../components/UserMenu'
 
-const MainScreen = ({navigation}) => {
+const MainScreen = () => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <View style={styles.header}>
-                    <DoctorCarousel />
-                    {/* <View style={styles.infor}>
-                        <View style={styles.bginfor}></View>
-                        <View>
-                            <FontAwesome 
-                            name="user-circle" size={40} 
-                            color="black"
-                            style={styles.inforicon} />
-                        </View>
-                        <View style={styles.textinfor}>
-                            <Text
-                            style={{
-                                fontSize: 17,
-                                fontWeight: 'bold',
-                                marginBottom: 5
-                            }}>Personal Information</Text>
-                            <Text>Enter to update</Text>
-                        </View>
-                        <MaterialIcons 
-                        name="navigate-next" 
-                        size={35} 
-                        color="black"
-                        style={{marginLeft: 50, marginTop: 22}} />
-                    </View> */}
+                    <TopDoctorCarousel />
             </View>
             
             <Animatable.View style={styles.footer} animation='fadeInUpBig'>

@@ -15,57 +15,37 @@ import host from '../../host'
 import { List } from 'react-native-paper';
 import axios from 'axios';
 import {useSelector} from 'react-redux'
-import UpdateSchedulesModal from '../../components/UpdateSchedulesModal'
 import ReviewModal from '../../components/ReviewModal'
+import PrescriptionModal from '../../components/PrescriptionModal'
 
 const DoctorSchedule = ({navigation}) => {
   const { doctor } = useSelector(state => state.doctors)
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const [dataUpdate, setDataUpdate] = useState({
-      id : null,
-      time: 0,
-      doctorId: null,
-  })
-
-  
   const [data, setData] = useState([])
 
   
-  const handleUpdate = (id, time, doctorId) => {
-     setDataUpdate({
-        id: id,
-        time: time,
-        doctorId: doctorId
-     })
-     setModalVisible1(!modalVisible1)
+  const handleUpdate = (id, user, doctorName, doctorId) => {
+     navigation.navigate("UpdateSchedules", {id: id, user: user, doctorName: doctorName, doctorId: doctorId, actor: 'doctor'})
   }
 
   const handleReview = () => setModalVisible2(!modalVisible2)
+  const handlePrescription = () => setModalVisible1(!modalVisible1)
 
-  const handleDelete = (id) => {
-    Alert.alert(
-      "Delete this schedule!",
-      "Are you sure?",
-      [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
-        },
-        { text: "OK", onPress: () => {
-            axios.post(host + "/schedules/delete", {id: id})
-        } }
-      ]
-    );
+  const handleExamed = async(id) => {
+      await axios.post(host + "/schedules/examed", {id: id})
+      .then(() => {
+          getSchedules()
+      })
+  }
+
+  const getSchedules = async() => {
+      const res = await axios.get(host + '/schedules/getallbydoctor/' + doctor.id)
+      setData(res.data)
   }
 
   useEffect(() => {
-    //   console.log(user.id);
-      axios.get(host + '/schedules/getallbydoctor/' + doctor.id)
-      .then(res => {
-          setData(res.data)
-      })
+    getSchedules()
   },[])
 
   return (
@@ -96,9 +76,47 @@ const DoctorSchedule = ({navigation}) => {
                     </View>
                 ))} 
                 </View>    
-    
+                {sch.status 
+                ? 
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                  <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.end-sch.begin, sch.doctorId._id)}>
+                    {!sch.reexam &&
+                    <TouchableOpacity onPress={() => navigation.navigate('ReExam', {doctor : sch.doctorId, userId: sch.userId._id ,scheduleId: sch._id})}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#CECCF5','#0970BE']}
+                                style={styles.update}
+                            >
+                                <Text style={styles.update_text}>Re-exam</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>
+                    }
+                    {!sch.prescription &&  
+                    <TouchableOpacity onPress={handlePrescription}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#CECCF5','#0970BE']}
+                                style={[styles.update, {width: 100}]}
+                            >
+                                <Text style={styles.update_text}>prescription</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>  
+                    }
+                </View>
+                :    
+                <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                  {(!sch.confirmation ? sch.confirmation : sch.confirmation.date )?
+                      <View style={styles.button}>
+                          <LinearGradient
+                              colors={['#F3F9A7','#CAC531']}
+                              style={[styles.update, {width: 200}]}
+                          >
+                              <Text style={styles.update_text}>Waiting for confirmation</Text>
+                          </LinearGradient>
+                      </View>
+                  :
+                  <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.userId, sch.doctorId.fullname, sch.doctorId._id)}>
                       <View style={styles.button}>
                           <LinearGradient
                               colors={['#CECCF5','#0970BE']}
@@ -107,20 +125,22 @@ const DoctorSchedule = ({navigation}) => {
                               <Text style={styles.update_text}>Update</Text>
                           </LinearGradient>
                       </View>
-                  </TouchableOpacity>  
-                  <TouchableOpacity onPress={() => handleDelete(sch._id)}>
+                  </TouchableOpacity>   
+                  }
+                  <TouchableOpacity onPress={() => handleExamed(sch._id)}>
                       <View style={styles.button}>
                           <LinearGradient
                               colors={['#D4919E','#C13815']}
                               style={styles.update}
                           >
-                              <Text style={styles.update_text}>Delete</Text>
+                              <Text style={styles.update_text}>Examed</Text>
                           </LinearGradient>
                       </View>
-                  </TouchableOpacity> 
+                  </TouchableOpacity>  
                 </View> 
-                <UpdateSchedulesModal dataUpdate={dataUpdate} modal={modalVisible1} setModal={handleUpdate} /> 
+                }
                 <ReviewModal data={sch.doctorId} modal={modalVisible2} setModal={handleReview} /> 
+                <PrescriptionModal data={sch} modal={modalVisible1} setModal={handlePrescription} /> 
               </List.Accordion>
             ))}
           </List.Section>

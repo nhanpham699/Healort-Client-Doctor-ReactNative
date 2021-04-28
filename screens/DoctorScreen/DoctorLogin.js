@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     View,
     SafeAreaView,
@@ -10,7 +10,8 @@ import {
     TextInput,
     AsyncStorage
 } from 'react-native'
-
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
 import * as Animatable from 'react-native-animatable'
 import { LinearGradient } from 'expo-linear-gradient'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
@@ -22,9 +23,19 @@ import {useDispatch, useSelector} from 'react-redux'
 
 import { addDoctor } from '../../actions/doctor'
 
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+});
 
 export default function DoctorLogin({navigation}){
-
+    const [expoPushToken, setExpoPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
     // console.log(navigation);
     const [secureText, setSecureText] = useState(true)
     const dispatch = useDispatch()
@@ -39,7 +50,8 @@ export default function DoctorLogin({navigation}){
        
         const response = {
             email: text.email,
-            password: text.password
+            password: text.password,
+            tokenDevices: expoPushToken
         }
         
         axios.post(host + '/doctors/login', response)
@@ -53,7 +65,64 @@ export default function DoctorLogin({navigation}){
         })
     }
 
+    useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+          setNotification(notification);
+        });
+    
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+          console.log(response);
+        });
+    
+        return () => {
+          Notifications.removeNotificationSubscription(notificationListener);
+          Notifications.removeNotificationSubscription(responseListener);
+        };
+      }, []);
 
+      async function schedulePushNotification() {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "You've got mail! 📬",
+            body: 'Here is the notification body',
+            data: { data: 'goes here' },
+          },
+          trigger: { seconds: 2 },
+        });
+      }
+
+      async function registerForPushNotificationsAsync() {
+        let token;
+        if (Constants.isDevice) {
+          const { status: existingStatus } = await Notifications.getPermissionsAsync();
+          let finalStatus = existingStatus;
+          if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+          }
+          if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+          }
+          token = (await Notifications.getExpoPushTokenAsync()).data;
+          console.log(token);
+        } else {
+          alert('Must use physical device for Push Notifications');
+        }
+      
+        if (Platform.OS === 'android') {
+          Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+          });
+        }
+      
+        return token;
+      }
     
 
     return(
@@ -93,7 +162,7 @@ export default function DoctorLogin({navigation}){
                 <TouchableOpacity onPress={login}>
                     <View style={styles.button}>
                         <LinearGradient
-                            colors={['#ffcccc', '#ff8080']}
+                            colors={['#44A08D', '#237A57']}
                             style={styles.login}
                         >
                             <Text style={styles.login_text}>Log in</Text>
@@ -110,7 +179,7 @@ export default function DoctorLogin({navigation}){
 var styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#ff8080'
+        backgroundColor: '#44A08D'
     },
     header: {
         flex: 1,

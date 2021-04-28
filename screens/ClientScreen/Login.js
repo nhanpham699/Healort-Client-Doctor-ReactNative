@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
     View,
     SafeAreaView,
@@ -11,7 +11,8 @@ import {
     AsyncStorage,
     KeyboardAvoidingView,
 } from 'react-native'
-
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
 import * as Animatable from 'react-native-animatable'
 import { LinearGradient } from 'expo-linear-gradient'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
@@ -23,9 +24,20 @@ import {useDispatch, useSelector} from 'react-redux'
 import { addDoctorInfor } from '../../actions/doctor.infor'
 import { addUser } from '../../actions/user'
 
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+});
 
 export default function Login({navigation}){
 
+    const [expoPushToken, setExpoPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
     // console.log(navigation);
     const [secureText, setSecureText] = useState(true)
     const dispatch = useDispatch()
@@ -40,13 +52,14 @@ export default function Login({navigation}){
        
         const response = {
             email: text.email,
-            password: text.password
+            password: text.password,
+            tokenDevices: expoPushToken
         }
         
         axios.post(host + '/users/login', response)
         .then( async(res) => {
-            const doctors = await axios.get(host + '/doctors/getalldoctors')
-            await dispatch(addDoctorInfor(doctors.data))
+            const doctors = await axios.get(host + '/doctors/gettopdoctor')
+            await dispatch(addDoctorInfor(doctors.data))        
             await AsyncStorage.setItem('UserToken', res.data.token);
             await dispatch(addUser(res.data.data))
             navigation.replace('Home')
@@ -55,8 +68,64 @@ export default function Login({navigation}){
         })
     }
 
-
+    useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
     
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+          setNotification(notification);
+        });
+    
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+          console.log(response);
+        });
+    
+        return () => {
+          Notifications.removeNotificationSubscription(notificationListener);
+          Notifications.removeNotificationSubscription(responseListener);
+        };
+      }, []);
+
+      async function schedulePushNotification() {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "You've got mail! 📬",
+            body: 'Here is the notification body',
+            data: { data: 'goes here' },
+          },
+          trigger: { seconds: 2 },
+        });
+      }
+
+      async function registerForPushNotificationsAsync() {
+        let token;
+        if (Constants.isDevice) {
+          const { status: existingStatus } = await Notifications.getPermissionsAsync();
+          let finalStatus = existingStatus;
+          if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+          }
+          if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+          }
+          token = (await Notifications.getExpoPushTokenAsync()).data;
+          console.log(token);
+        } else {
+          alert('Must use physical device for Push Notifications');
+        }
+      
+        if (Platform.OS === 'android') {
+          Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+          });
+        }
+      
+        return token;
+      }
 
     return(
         <KeyboardAvoidingView style={{flex: 1}} behavior="padding">
