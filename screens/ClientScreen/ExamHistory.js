@@ -28,12 +28,18 @@ const ExamHistory = ({navigation}) => {
 
 //   const dispatch = useDispatch()
   const { user } = useSelector(state => state.users)
-  const [modalVisible2, setModalVisible2] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState({
+      id: "",
+      state: false
+  });
   const [data, setData] = useState([])
-
+ 
   const stars = [1,2,3,4,5]
 
-  const handleReview = () => setModalVisible2(!modalVisible2)
+  const handleReview = (id) => setModalVisible2({
+    id: id,
+    state: !modalVisible2.state
+  })
 
   const getAllSchedules = async() => {
     const res = await axios.get(host + '/schedules/getallschedules/' + user.id)
@@ -74,9 +80,9 @@ const ExamHistory = ({navigation}) => {
                     </View>
                 ))} 
                 </View>
-                {!sch.doctorId.review.find(x => x.userId == user.id) ?   
+                {!sch.doctorId.review.find(x => x.scheduleId == sch._id) ?   
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                    <TouchableOpacity onPress={handleReview}>
+                    <TouchableOpacity onPress={() => handleReview(sch._id)}>
                         <View style={[styles.button,{marginRight: 20}]}>
                             <LinearGradient
                                 colors={['#D4919E','#C13815']}
@@ -91,12 +97,19 @@ const ExamHistory = ({navigation}) => {
                 <View style={{flexDirection: 'row'}}>
                   {stars.map(star => (
                       <View key={star}>
-                        <Star filled={star <= sch.doctorId.review.find(x => x.userId == user.id).rating ? true : false} />
+                        <Star filled={star <= sch.doctorId.review.find(x => x.scheduleId == sch._id).rating ? true : false} />
                       </View>
                   ))}
                 </View>
                 }
-                <ReviewModal data={sch.doctorId} modal={modalVisible2} setModal={handleReview} /> 
+                {sch._id == modalVisible2.id && modalVisible2 &&
+                <ReviewModal
+                scheduleId={sch._id} 
+                setData={getAllSchedules} 
+                data={sch.doctorId} 
+                modal={modalVisible2} 
+                setModal={handleReview} /> 
+                }
               </List.Accordion>
             ))}
           </List.Section>

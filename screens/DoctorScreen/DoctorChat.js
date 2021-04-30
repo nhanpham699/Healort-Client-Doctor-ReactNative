@@ -22,7 +22,7 @@ const ChatScreen = ({navigation,route}) => {
 
     useEffect(() => {
       const name = doctor.fullname;
-      const room = doctor.id + '_' +  route.params.userId 
+      const room = doctor.id + '_' +  route.params.user._id 
 
       axios.post(host + '/chats/createRoom', {room})
       axios.get(host + '/chats/showMessages/' + room).then(res => {setMessages(res.data.messages)})
@@ -51,7 +51,14 @@ const ChatScreen = ({navigation,route}) => {
     }, []);
 
     const onSend = useCallback((message = {}) => {
-      socket.emit('sendMessage', message);  
+      const newMessageData = message.map(dt => {
+        return {...dt, user: {
+            _id: doctor.id,
+            avatar: doctor.avatar,
+            name: doctor.fullname
+        }}
+    })
+      socket.emit('sendMessage', newMessageData);  
       setMessages((previousMessages) =>{
           return GiftedChat.append(previousMessages, message)
       });
@@ -111,7 +118,7 @@ const ChatScreen = ({navigation,route}) => {
           user={{
             _id: doctor.id,
             name: doctor.fullname,
-            avatar: doctor.avatar
+            avatar: host + doctor.avatar
 
           }}
           renderBubble={renderBubble}

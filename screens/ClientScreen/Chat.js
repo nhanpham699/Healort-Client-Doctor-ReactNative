@@ -15,6 +15,9 @@ const ChatScreen = ({navigation,route}) => {
 
     const socket = io(host);
 
+    const { doctor } = route.params
+
+    // console.log(route);
 
     const [name, setName] = React.useState('');
     const [room, setRoom] = React.useState('');
@@ -22,7 +25,7 @@ const ChatScreen = ({navigation,route}) => {
 
     useEffect(() => {
       const name = user.fullname;
-      const room = route.params.doctorId + '_' + user.id;
+      const room = doctor._id + '_' + user.id;
 
       axios.post(host + '/chats/createRoom', {room})
       axios.get(host + '/chats/showMessages/' + room).then(res => {setMessages(res.data.messages)})
@@ -51,7 +54,16 @@ const ChatScreen = ({navigation,route}) => {
     }, []);
 
     const onSend = useCallback((message = {}) => {
-      socket.emit('sendMessage', message);  
+      // console.log(message);
+      const newMessageData = message.map(dt => {
+          return {...dt, user: {
+              _id: user.id,
+              avatar: user.avatar,
+              name: user.fullname
+          }}
+      })
+      // console.log(newMessageData);
+      socket.emit('sendMessage', newMessageData);  
       setMessages((previousMessages) =>{
           return GiftedChat.append(previousMessages, message)
       });
@@ -123,8 +135,7 @@ const ChatScreen = ({navigation,route}) => {
         user={{
           _id: user.id,
           name: user.fullname,
-          avatar: user.avatar
-
+          avatar: host + user.avatar
         }}
         renderBubble={renderBubble}
         alwaysShowSend

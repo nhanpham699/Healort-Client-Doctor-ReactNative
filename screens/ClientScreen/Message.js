@@ -60,9 +60,9 @@ const MessagesScreen = ({navigation}) => {
         }
         const newData = doctorsList.map(dt => {
             return {
-              id: dt._id,
-              userName: dt.fullname,
-              userImg: dt.avatar,
+              _id: dt._id,
+              fullname: dt.fullname,
+              avatar: dt.avatar,
               messageText: dt.messageText,
               messageTime: dt.messageTime
             }
@@ -86,16 +86,16 @@ const MessagesScreen = ({navigation}) => {
                 <FlatList 
                 style={{marginTop: 20}}  
                 data={messages}
-                keyExtractor={item=>item.id}
+                keyExtractor={item=>item._id}
                 renderItem={({item}) => (
-                    <Card onPress={() => navigation.navigate('Chat', {doctorName: item.userName, doctorId: item.id})}>
+                    <Card onPress={() => navigation.navigate('Chat', {doctor: item})}>
                     <UserInfo>
                         <UserImgWrapper>
-                        <UserImg source={{uri : host + item.userImg}} />
+                        <UserImg source={{uri : host + item.avatar}} />
                         </UserImgWrapper>
                         <TextSection>
                         <UserInfoText>
-                            <UserName>{item.userName}</UserName>
+                            <UserName>{item.fullname}</UserName>
                             <PostTime>{item.messageTime}</PostTime>
                         </UserInfoText>
                         <MessageText>{item.messageText}</MessageText>

@@ -27,11 +27,20 @@ export default function ReExam({navigation}) {
   
   const handleUpdate = (id, user, doctorName, doctorId) => {
     navigation.navigate("UpdateReexam", {id: id, user: user, doctorName: doctorName, doctorId: doctorId, actor: 'doctor'})
- }
+  }
+
+  const handleExamed = async(id) => {
+      console.log(id);
+      await axios.post(host + '/reexams/examed', {id: id})
+      .then(() => {
+          getAllSchedules()
+      })
+  }
 
   const getAllSchedules = async() => {
     const res = await axios.get(host + '/reexams/getallreexamsbydoctor/' + doctor.id)
-    setData(res.data)
+    const newData = res.data.filter(dt => dt.status == 0)
+    setData(newData)
   }
 
   useEffect(() => {
@@ -81,6 +90,16 @@ export default function ReExam({navigation}) {
                       </View>
                   </TouchableOpacity>   
                   }  
+                  <TouchableOpacity onPress={() => handleExamed(sch._id)}>
+                      <View style={styles.button}>
+                          <LinearGradient
+                              colors={['#D4919E','#C13815']}
+                              style={styles.update}
+                          >
+                              <Text style={styles.update_text}>Examed</Text>
+                          </LinearGradient>
+                      </View>
+                  </TouchableOpacity>  
                 </View> 
               </List.Accordion>
             ))}

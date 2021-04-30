@@ -55,7 +55,7 @@ const Flatlist = (props) => {
         item={item}
         style={{ backgroundColor }}
         onPress={() => handleModal(item._id)}
-        onNavigate={() => navigation.navigate('DoctorChat', {userName: item.fullname, userId: item._id})}
+        onNavigate={() => navigation.navigate('DoctorChat', {user: item})}
         modal={modalVisible}
       />
     );

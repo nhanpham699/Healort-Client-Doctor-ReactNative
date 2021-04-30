@@ -21,7 +21,6 @@ import PrescriptionModal from '../../components/PrescriptionModal'
 const DoctorSchedule = ({navigation}) => {
   const { doctor } = useSelector(state => state.doctors)
   const [modalVisible1, setModalVisible1] = useState(false);
-  const [modalVisible2, setModalVisible2] = useState(false);
   const [data, setData] = useState([])
 
   
@@ -29,7 +28,6 @@ const DoctorSchedule = ({navigation}) => {
      navigation.navigate("UpdateSchedules", {id: id, user: user, doctorName: doctorName, doctorId: doctorId, actor: 'doctor'})
   }
 
-  const handleReview = () => setModalVisible2(!modalVisible2)
   const handlePrescription = () => setModalVisible1(!modalVisible1)
 
   const handleExamed = async(id) => {
@@ -139,7 +137,6 @@ const DoctorSchedule = ({navigation}) => {
                   </TouchableOpacity>  
                 </View> 
                 }
-                <ReviewModal data={sch.doctorId} modal={modalVisible2} setModal={handleReview} /> 
                 <PrescriptionModal 
                 data={sch} 
                 modal={modalVisible1} 

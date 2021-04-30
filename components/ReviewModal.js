@@ -26,7 +26,12 @@ const Star = (props) => {
 export default ReviewModal = (props,{navigation}) => {
   const dispatch = useDispatch()
   
-  const {data, modal, setModal} = props
+  const {
+    scheduleId, 
+    data, 
+    modal, 
+    setModal, 
+    setData } = props
 
   const stars = [1,2,3,4,5]
   const { user } = useSelector(state => state.users)
@@ -34,8 +39,11 @@ export default ReviewModal = (props,{navigation}) => {
       rating: 0,
       comment: null,
       userId: user.id,
-      doctorId: data._id
+      doctorId: data._id,
+      scheduleId: scheduleId
   })
+
+  console.log(scheduleId);
 
   const handleRating = (rate,id) => {
       setReview({...review, rating: rate})
@@ -55,7 +63,8 @@ export default ReviewModal = (props,{navigation}) => {
                 onPress: async() =>  {
                     const doctors = await axios.get(host + '/doctors/gettopdoctor')
                     await dispatch(addDoctorInfor(doctors.data))
-                    setModal(!modal)
+                    setModal(null)
+                    setData()
                 },
                 style: "cancel",
                 },
@@ -70,7 +79,7 @@ export default ReviewModal = (props,{navigation}) => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modal}
+        visible={(scheduleId == modal.id) && modal.state}
         onRequestClose={setModal}
       >
         <View style={styles.centeredView}>
@@ -113,7 +122,7 @@ export default ReviewModal = (props,{navigation}) => {
                                 </LinearGradient>
                             </View>
                         </TouchableOpacity>  
-                        <TouchableOpacity onPress={setModal}>
+                        <TouchableOpacity onPress={() => setModal(null)}>
                             <View style={styles.button}>
                                 <LinearGradient
                                     colors={['#D4919E','#C13815']}

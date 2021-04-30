@@ -29,6 +29,7 @@ const ratingTotal = (rate) => {
     for(let i of rate){
         total += i.rating 
     }
+    total = total/rate.length
     return total
 }
 
