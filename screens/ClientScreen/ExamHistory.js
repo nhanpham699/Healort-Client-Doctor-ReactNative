@@ -9,7 +9,7 @@ import {
     Alert,
     ScrollView
 } from 'react-native'
-import { Ionicons,  FontAwesome } from '@expo/vector-icons'; 
+import { Ionicons, AntDesign } from '@expo/vector-icons'; 
 import { LinearGradient } from 'expo-linear-gradient'
 import host from '../../host'
 import { List } from 'react-native-paper';
@@ -18,6 +18,11 @@ import {useSelector, useDispatch} from 'react-redux'
 // import {addDoctorInfor} from '../../actions/doctor.infor'
 import ReviewModal from '../../components/ReviewModal'
 
+const Star = (props) => {
+  return(
+      <AntDesign style={{marginHorizontal: 5, marginTop: 10}} name={props.filled ? "star" : "staro"} size={24} color="#ff9900" />
+  )
+}
 
 const ExamHistory = ({navigation}) => {
 
@@ -26,11 +31,9 @@ const ExamHistory = ({navigation}) => {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [data, setData] = useState([])
 
-  
+  const stars = [1,2,3,4,5]
 
   const handleReview = () => setModalVisible2(!modalVisible2)
-
-  
 
   const getAllSchedules = async() => {
     const res = await axios.get(host + '/schedules/getallschedules/' + user.id)
@@ -70,19 +73,29 @@ const ExamHistory = ({navigation}) => {
                       {(ser == 2) && <Text style={styles.servicetext}> Dental implants</Text>}
                     </View>
                 ))} 
-                </View>    
+                </View>
+                {!sch.doctorId.review.find(x => x.userId == user.id) ?   
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
                     <TouchableOpacity onPress={handleReview}>
-                          <View style={[styles.button,{marginRight: 20}]}>
-                              <LinearGradient
-                                  colors={['#D4919E','#C13815']}
-                                  style={styles.update}
-                              >
-                                  <Text style={styles.update_text}>Rate</Text>
-                              </LinearGradient>
-                          </View>
+                        <View style={[styles.button,{marginRight: 20}]}>
+                            <LinearGradient
+                                colors={['#D4919E','#C13815']}
+                                style={styles.update}
+                            >
+                                <Text style={styles.update_text}>Rate</Text>
+                            </LinearGradient>
+                        </View>
                     </TouchableOpacity> 
                 </View>
+                : 
+                <View style={{flexDirection: 'row'}}>
+                  {stars.map(star => (
+                      <View key={star}>
+                        <Star filled={star <= sch.doctorId.review.find(x => x.userId == user.id).rating ? true : false} />
+                      </View>
+                  ))}
+                </View>
+                }
                 <ReviewModal data={sch.doctorId} modal={modalVisible2} setModal={handleReview} /> 
               </List.Accordion>
             ))}

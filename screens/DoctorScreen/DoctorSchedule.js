@@ -140,7 +140,11 @@ const DoctorSchedule = ({navigation}) => {
                 </View> 
                 }
                 <ReviewModal data={sch.doctorId} modal={modalVisible2} setModal={handleReview} /> 
-                <PrescriptionModal data={sch} modal={modalVisible1} setModal={handlePrescription} /> 
+                <PrescriptionModal 
+                data={sch} 
+                modal={modalVisible1} 
+                setModal={handlePrescription}
+                getData={getSchedules} /> 
               </List.Accordion>
             ))}
           </List.Section>

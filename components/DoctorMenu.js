@@ -25,6 +25,11 @@ const DATA = [
     id: "4",
     title: "Enter busy date/time",
     icon: "calendar-times-o"
+  },
+  {
+    id: "5",
+    title: "Re-examination",
+    icon: "calendar"
   }
 ];
 
@@ -53,8 +58,9 @@ const Flatlist = ({}) => {
     switch(id) {
         case '1':  return navigation.navigate('Patient')
         case '2':  return navigation.navigate('DoctorSchedule')
-        case '3':  return navigation.navigate('DoctorChat')
+        case '3':  return navigation.navigate('DoctorMessage')
         case '4':  return navigation.navigate('BusyDoctor')
+        case '5':  return navigation.navigate('DoctorReExam')
     }
   }
 

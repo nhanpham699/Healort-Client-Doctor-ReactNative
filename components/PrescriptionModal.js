@@ -24,7 +24,7 @@ import RNPickerSelect from "react-native-picker-select";
 
 export default PresctiptionModal = (props,{navigation}) => { 
   
-  const {data, modal, setModal} = props
+  const {data, modal, setModal, getData} = props
   const [medicineData, setMedicineData] = useState([])
   // const [number, setNumber] = useState([1])
   const [pres, setPres] = useState({
@@ -95,18 +95,12 @@ export default PresctiptionModal = (props,{navigation}) => {
             "Create the prescription",
             "successfully",
             [
-              { text: "OK", onPress: () => {
+              { text: "OK", onPress: async() => {
                   setModal()
-                  setPres({
-                    date: new Date(),
-                    medicine: [{value: "", quantity: 1, price: 0}],
-                    scheduleId: data._id,
-                    doctorId: data.doctorId._id,
-                    userId: data.userId._id,
-                    times: 1,
-                    note: "",
-                    total: 0
-                })
+                  await axios.post(host + '/schedules/updatePrescription',{id: pres.scheduleId})
+                  .then(() => {
+                      getData()
+                  })
               } }
             ]
           );

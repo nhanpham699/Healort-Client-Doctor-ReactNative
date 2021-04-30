@@ -11,8 +11,6 @@ import {
 import { Ionicons } from '@expo/vector-icons'; 
 import host from '../../host'
 import axios from 'axios'
-import DoctorModal from '../../components/DoctorModal'
-import CheckBox from 'react-native-check-box'
 import { useNavigation } from "@react-navigation/native";
 import {useSelector} from 'react-redux'
 
@@ -57,7 +55,7 @@ const Flatlist = (props) => {
         item={item}
         style={{ backgroundColor }}
         onPress={() => handleModal(item._id)}
-        onNavigate={() => navigation.navigate('Chat', {doctorName: item.fullname, doctorId: item._id})}
+        onNavigate={() => navigation.navigate('DoctorChat', {userName: item.fullname, userId: item._id})}
         modal={modalVisible}
       />
     );
@@ -95,7 +93,10 @@ export default function Patient({navigation}){
 
     const getAllPatients = async() => {
        const res = await axios.get(host+ '/schedules/getallbydoctor/' + doctor.id)
-       const newData = res.data.map(dt => dt.userId)
+       const dataMap = res.data.map(dt => dt.userId)
+       const dataTest = dataMap.map(dt => dt._id)
+       const newData = dataMap.filter((dt, index) => dataTest.indexOf(dt._id) == index )
+
        setData(newData)
        setDataSearch(newData)
     }

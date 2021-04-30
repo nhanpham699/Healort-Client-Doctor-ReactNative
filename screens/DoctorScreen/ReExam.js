@@ -84,18 +84,17 @@ export default function ReExam({navigation, route}) {
     const [dateArr, setDateArr] = useState(DATE_DATA)
     const [hourArr, setHourArr] = useState(HOUR_DATA)
     const [schedules, setSchedules] = useState([])
+    const [reexams, setReexams] = useState([])
     const [selectedHourId, setSelectedHourId] = useState(null);
     const [selectedDateId, setSelectedDateId] = useState(null);
     const [data, setData] = useState({
         date: null,
         begin: 0,
-        total: 0,
         doctorId: doctor._id,
         scheduleId: scheduleId,
         note: null,
         userId: userId,
         status: 0,
-        times: null
     })    
 
     const renderDateItem = ({ item }) => {
@@ -136,14 +135,22 @@ export default function ReExam({navigation, route}) {
         );
     };
     
-    const handleCheckDate = (schedule) => {
+    const handleCheckDate = (schedule, reexam) => {
         setDateArr(DATE_DATA)
         let arr = DATE_DATA
         let repeat = []
 
         const scheduleArr = schedule.filter(dt => {
-            return dt.doctorId._id == doctor._id && dt.status == 0
+            return dt.doctorId._id == data.doctorId && dt.status == 0
         })
+
+        const reexamArr = reexam.filter(dt => {
+            return dt.doctorId._id == data.doctorId && dt.status == 0
+        })
+
+        for(let re of reexamArr){
+            scheduleArr.push(re)
+        }
 
         for(let sch of scheduleArr){
             for (let i = 0; i<dateArr.length; i++){
@@ -183,18 +190,17 @@ export default function ReExam({navigation, route}) {
         setHourArr(HOUR_DATA)
     }
 
-
     
 
     const getDate = (item) => {
         setHourArr(HOUR_DATA)
-        if(!data.doctorId){
-            alert("please choose a doctor!")
-        }else{
             let arr = HOUR_DATA
             const scheduleArr = schedules.filter(dt => {
                 return dt.doctorId._id == data.doctorId && dt.status == 0
             })
+            for(let re of reexams){
+                scheduleArr.push(re)
+            }
             setSelectedDateId(item.id)
             setSelectedHourId(null)
             setData({...data, date: item.value, begin: 0})
@@ -208,31 +214,32 @@ export default function ReExam({navigation, route}) {
                                 ...arr.slice(i+1)
                             ]
                             setHourArr(arr)
-                            break
                         }                        
                     }
                  }
             }
-        }   
     }    
     // Hour
     const getHour = (item) => {
         if(!data.date){
             alert("you haven't chosen a date yet!")
         }else{
-            setData({...data, begin : item.value })
+            setData({...data, begin : item.value})
             setSelectedHourId(item.id)             
         }
     }
 
     useEffect(() => {
-
         axios.get(host + '/schedules/getallschedules/')
-        .then(res => {
-            setSchedules(res.data)
-            handleCheckDate(res.data)
-        })         
+        .then(res1 => {
+            axios.get(host + '/reexams/getallreexams/')
+            .then(res2 => {
+                setReexams(res2.data)
+                setSchedules(res1.data)
+                handleCheckDate(res1.data, res2.data)
+            })  
 
+        })        
     },[])
 
     const make = async() => {
@@ -240,12 +247,7 @@ export default function ReExam({navigation, route}) {
         if(!data.date || !data.doctorId || !data.begin || !data.note){
             alert("Make an appointment failed!!")
         }else{
-            const newData = {
-                ...data,
-                total: Number(data.total),
-                times: Number(data.times)
-            }
-            await axios.post(host + '/reexams/add', newData)
+            await axios.post(host + '/reexams/add', data)
             .then(async() => {
                 await axios.post(host + '/schedules/updateReexam', {id: data.scheduleId})
                 Alert.alert(
@@ -306,26 +308,6 @@ export default function ReExam({navigation, route}) {
                         </View>  
                     </View>
                     <View style={styles.footer}>
-                        <View>
-                            <Text style={styles.choose}>Examination time</Text>
-                            <View style={{paddingHorizontal: 15}}>
-                                <TextInput 
-                                placeholder="   time" 
-                                style={styles.text_input} 
-                                autoCapitalize="none"
-                                onChangeText={value => setData({...data, times: value})} />
-                            </View>
-                        </View>
-                        <View>
-                            <Text style={styles.choose}>Price total</Text>
-                            <View style={{paddingHorizontal: 15}}>
-                                <TextInput 
-                                placeholder="   price" 
-                                style={styles.text_input} 
-                                autoCapitalize="none"
-                                onChangeText={value => setData({...data, price: value})} />
-                            </View>
-                        </View>
                         <View>
                             <Text style={styles.choose}>Note</Text>
                             <View style={{paddingHorizontal: 15}}>

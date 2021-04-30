@@ -24,8 +24,8 @@ const ChatScreen = ({navigation,route}) => {
       const name = user.fullname;
       const room = route.params.doctorId + '_' + user.id;
 
-      axios.post(host + '/chat/createRoom', {room})
-      axios.get(host + '/chat/showMessages/' + room).then(res => {setMessages(res.data.messages)})
+      axios.post(host + '/chats/createRoom', {room})
+      axios.get(host + '/chats/showMessages/' + room).then(res => {setMessages(res.data.messages)})
 
       setName(name)
       setRoom(room)
@@ -122,7 +122,7 @@ const ChatScreen = ({navigation,route}) => {
         onSend={(messages) => onSend(messages)}
         user={{
           _id: user.id,
-          name: user.name,
+          name: user.fullname,
           avatar: user.avatar
 
         }}

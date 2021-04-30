@@ -1,3 +1,3 @@
-const host = "http://192.168.3.151:8080"
+const host = "http://192.168.20.103:8080"
 
 export default host

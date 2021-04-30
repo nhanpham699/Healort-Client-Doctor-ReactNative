@@ -16,7 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'; 
 import host from '../../host'
 import axios from 'axios'
-
+import { useSelector } from 'react-redux'
 
 const Messages = [
   {
@@ -37,12 +37,42 @@ const Messages = [
 
 const MessagesScreen = ({navigation}) => {
 
-    // const [messages, setMessages] = useState([])
+    const [messages, setMessages] = useState([])
+    const { user } = useSelector(state => state.users)
 
-    // useEffect(() => {
-    //     axios.get(host + '/doctors/getalldoctors')
-    //     .then(res => setMessages(res.data))
-    // })
+    const getMessages = async() => {
+        const doctorsList = []
+        const res = await axios.get(host + '/chats/getUserListMessages/' + user.id)
+
+        for(let i of res.data){
+          const { room } = i
+          console.log(i);
+          const doctorId = room.slice(0, room.indexOf('_'))
+          const doctor = await axios.get(host + '/doctors/getdoctorbyid/' + doctorId)
+          const newData = {
+            ...doctor.data, 
+            messageTime:  (new Date(i.messages[0].createdAt).toString().slice(16,21)) + " " 
+                        + (new Date(i.messages[0].createdAt).getDate()) + '/'
+                        + (new Date(i.messages[0].createdAt).getMonth()+1), 
+            messageText: i.messages[0].text
+          }
+          doctorsList.push(newData)
+        }
+        const newData = doctorsList.map(dt => {
+            return {
+              id: dt._id,
+              userName: dt.fullname,
+              userImg: dt.avatar,
+              messageText: dt.messageText,
+              messageTime: dt.messageTime
+            }
+        })
+        // console.log(newData);
+        setMessages(newData)
+    }
+    useEffect(() => {
+        getMessages()
+    },[])
 
     return (
       <View style={{flex: 1}}>
@@ -55,13 +85,13 @@ const MessagesScreen = ({navigation}) => {
             <Container>
                 <FlatList 
                 style={{marginTop: 20}}  
-                data={Messages}
+                data={messages}
                 keyExtractor={item=>item.id}
                 renderItem={({item}) => (
-                    <Card onPress={() => navigation.navigate('Chat', {userName: item.userName})}>
+                    <Card onPress={() => navigation.navigate('Chat', {doctorName: item.userName, doctorId: item.id})}>
                     <UserInfo>
                         <UserImgWrapper>
-                        <UserImg source={item.userImg} />
+                        <UserImg source={{uri : host + item.userImg}} />
                         </UserImgWrapper>
                         <TextSection>
                         <UserInfoText>

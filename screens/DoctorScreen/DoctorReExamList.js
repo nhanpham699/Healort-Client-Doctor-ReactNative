@@ -21,56 +21,16 @@ import {useSelector, useDispatch} from 'react-redux'
 export default function ReExam({navigation}) {
 
   // const dispatch = useDispatch()
-  const { user } = useSelector(state => state.users)
+  const { doctor } = useSelector(state => state.doctors)
   const [data, setData] = useState([])
 
   
-  const handleUpdate = (id, doctorName, doctorId) => {
-    navigation.navigate("UpdateReexam", {
-      id: id, 
-      doctorName: doctorName, 
-      doctorId: doctorId, 
-      actor: 'user'
-    })
+  const handleUpdate = (id, user, doctorName, doctorId) => {
+    navigation.navigate("UpdateReexam", {id: id, user: user, doctorName: doctorName, doctorId: doctorId, actor: 'doctor'})
  }
 
-
-  const handleDelete = (id) => {
-    Alert.alert(
-      "Delete this schedule!",
-      "Are you sure?",
-      [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
-        },
-        { text: "OK", onPress: async() => {
-            await axios.post(host + "/reexams/delete", {id: id})
-            const currentSchedule = data.filter(dt => dt._id == id)
-            const doctor = currentSchedule[0].doctorId
-            const dataSaved = {
-                sender: 'user',
-                userId : user.id,
-                doctorId: doctor._id,
-                title: 'Delete the re-exam schedule',
-                body: user.fullname + ' deleted the re-exam schedule! Please check your re-exam schedule!',
-                date: new Date()
-            }
-            
-            for(var token of doctor.tokens){
-                await sendPushNotification(token.tokenDevices);
-            }
-
-            await axios.post(host + '/notifications/add', dataSaved)
-            getAllSchedules()
-        } }
-      ]
-    );
-  }
-
   const getAllSchedules = async() => {
-    const res = await axios.get(host + '/reexams/getallreexamsbyuser/' + user.id)
+    const res = await axios.get(host + '/reexams/getallreexamsbydoctor/' + doctor.id)
     setData(res.data)
   }
 
@@ -78,26 +38,6 @@ export default function ReExam({navigation}) {
       getAllSchedules()
   },[])
 
-  async function sendPushNotification(expoPushToken) {
-    const message = {
-      to: expoPushToken,
-      sound: 'default',
-      title: 'Delete the re-exam schedule',
-      body: user.fullname + ' deleted the re-exam schedule! Please check your re-exam schedule!',
-      data: { someData: 'goes here' },
-    };
-    
-
-    await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Accept-encoding': 'gzip, deflate',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(message),
-    });
-  }
 
   return (
     <View style={styles.container}>
@@ -116,11 +56,21 @@ export default function ReExam({navigation}) {
                 left={props => <List.Icon {...props} icon="calendar-today" />}
                 >
                 <List.Item style={{marginTop: -10}} title={'Time: ' + sch.begin + ':00'} />
-                <List.Item title={'Doctor: ' + sch.doctorId.fullname} />
+                <List.Item title={'User name: ' + sch.userId.fullname} />
                 <List.Item title={'Old schedule: ' + (new Date(sch.scheduleId.date)).toString().slice(0,15)} />  
 
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                  <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.doctorId.fullname, sch.doctorId._id)}>
+                  {(!sch.confirmation ? sch.confirmation : sch.confirmation.date )?
+                      <View style={styles.button}>
+                          <LinearGradient
+                              colors={['#F3F9A7','#CAC531']}
+                              style={[styles.update, {width: 200}]}
+                          >
+                              <Text style={styles.update_text}>Waiting for confirmation</Text>
+                          </LinearGradient>
+                      </View>
+                  :
+                  <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.userId, sch.doctorId.fullname, sch.doctorId._id)}>
                       <View style={styles.button}>
                           <LinearGradient
                               colors={['#CECCF5','#0970BE']}
@@ -129,17 +79,8 @@ export default function ReExam({navigation}) {
                               <Text style={styles.update_text}>Update</Text>
                           </LinearGradient>
                       </View>
-                  </TouchableOpacity>  
-                  <TouchableOpacity onPress={() => handleDelete(sch._id)}>
-                      <View style={styles.button}>
-                          <LinearGradient
-                              colors={['#D4919E','#C13815']}
-                              style={styles.update}
-                          >
-                              <Text style={styles.update_text}>Delete</Text>
-                          </LinearGradient>
-                      </View>
-                  </TouchableOpacity> 
+                  </TouchableOpacity>   
+                  }  
                 </View> 
               </List.Accordion>
             ))}

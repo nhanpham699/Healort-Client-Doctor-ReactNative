@@ -14,6 +14,7 @@ import {useSelector, useDispatch} from 'react-redux'
 import {addDoctorInfor} from '../../actions/doctor.infor'
 import axios from 'axios';
 import host from '../../host';
+
 export default function Notifications({navigation}){
     const dispatch = useDispatch()
     const { user } = useSelector(state => state.users)
@@ -24,47 +25,79 @@ export default function Notifications({navigation}){
         setData(newData)
     }
 
-    const handleRefuse = (id, doctor, notifId) => {
+    const handleRefuse = (scheduleId, reexamId, doctor, notifId) => {
         Alert.alert(
             "Update or delete your schedule",
             "Click 'Update' if you want to update the schedule. Click 'Delete' if you want to remove the schedule",
             [
               { text: "Update", onPress: async() => {
-                    await axios.post(host + '/notifications/update', {id : notifId})
-                    .then(() => {
-                        getData()
-                        navigation.navigate("UpdateSchedules", {
-                            id: id, 
-                            doctorName: doctor.fullname, 
-                            doctorId: doctor._id, 
-                            actor: 'user',
-                            component: 'notification'
+                        await axios.post(host + '/notifications/update', {id : notifId})
+                        .then(() => {
+                            getData()
+                            if(scheduleId){
+                                navigation.navigate("UpdateSchedules", {
+                                    id: scheduleId, 
+                                    doctorName: doctor.fullname, 
+                                    doctorId: doctor._id, 
+                                    actor: 'user',
+                                    component: 'notification'
+                                })
+                            }else if(reexamId){
+                                navigation.navigate("UpdateReexam", {
+                                    id: reexamId, 
+                                    doctorName: doctor.fullname, 
+                                    doctorId: doctor._id, 
+                                    actor: 'user',
+                                    component: 'notification'
+                                })
+                            }
                         })
-                    })
               } }, 
               { text: "Delete", onPress: async() => {
-                    await axios.post(host + "/schedules/delete", {id: id})
+                    if(scheduleId){
+                        await axios.post(host + "/schedules/delete", {id: scheduleId._id})
                    
-                    const dataSaved = {
-                        sender: 'user',
-                        userId : user.id,
-                        doctorId: doctor._id,
-                        title: 'Delete the schedule',
-                        body: user.fullname + ' has rejected and deleted your request to update the schedule! Please check your schedules!',
-                        date: new Date()
+                        const dataSaved = {
+                            sender: 'user',
+                            userId : user.id,
+                            doctorId: doctor._id,
+                            title: 'Delete the schedule',
+                            body: user.fullname + ' has rejected and deleted your request to update the schedule! Please check your schedules!',
+                            date: new Date()
+                        }
+                        const doctors = await axios.get(host + '/doctors/gettopdoctor')
+                        await dispatch(addDoctorInfor(doctors.data))
+            
+                        for(var token of doctor.tokens){
+                            await sendDeleteNotification(token.tokenDevices, user.fullname);
+                        }
+            
+                        await axios.post(host + '/notifications/add', dataSaved)
+                        await axios.post(host + '/notifications/update', {id : notifId})
+                        .then(() => {
+                            getData()
+                        })
+                    }else if(reexamId){
+                        await axios.post(host + "/reexams/delete", {id: reexamId._id})
+                   
+                        const dataSaved = {
+                            sender: 'user',
+                            userId : user.id,
+                            doctorId: doctor._id,
+                            title: 'Delete the schedule',
+                            body: user.fullname + ' has rejected and deleted your request to update the schedule! Please check your schedules!',
+                            date: new Date()
+                        }
+                        for(var token of doctor.tokens){
+                            await sendDeleteNotification(token.tokenDevices, user.fullname);
+                        }
+            
+                        await axios.post(host + '/notifications/add', dataSaved)
+                        await axios.post(host + '/notifications/update', {id : notifId})
+                        .then(() => {
+                            getData()
+                        })
                     }
-                    const doctors = await axios.get(host + '/doctors/gettopdoctor')
-                    await dispatch(addDoctorInfor(doctors.data))
-        
-                    for(var token of doctor.tokens){
-                        await sendDeleteNotification(token.tokenDevices, user.fullname);
-                    }
-        
-                    await axios.post(host + '/notifications/add', dataSaved)
-                    await axios.post(host + '/notifications/update', {id : notifId})
-                    .then(() => {
-                        getData()
-                    })
               }},
               {
                 text: "Cancel",
@@ -75,28 +108,52 @@ export default function Notifications({navigation}){
         );
     }
 
-    const handleUpdate = async(scheduleId, notifId) => {
-        const res = await axios.post(host + '/schedules/update', {id : scheduleId})
-        const doctor = res.data.doctorId
-        const dataSaved = {
-            sender: 'user',
-            userId : user.id,
-            doctorId: doctor._id,
-            title: 'Update the schedule',
-            body: user.fullname + ' has accepted your request to update the schedule! Please check your schedules!',
-            date: new Date()
-        }
-       
-        await axios.post(host + '/notifications/add', dataSaved)
-    
-        for(var token of doctor.tokens){
-            await sendUpdateNotification(token.tokenDevices, user.fullname);
-        }
+    const handleUpdate = async(scheduleId, reexamId, notifId) => {
+        if(scheduleId){
+            const res = await axios.post(host + '/schedules/update', {id : scheduleId._id})
+            const doctor = res.data.doctorId
+            const dataSaved = {
+                sender: 'user',
+                userId : user.id,
+                doctorId: doctor._id,
+                title: 'Update the schedule',
+                body: user.fullname + ' has accepted your request to update the schedule! Please check your schedules!',
+                date: new Date()
+            }
+        
+            await axios.post(host + '/notifications/add', dataSaved)
+        
+            for(var token of doctor.tokens){
+                await sendUpdateNotification(token.tokenDevices, user.fullname);
+            }
 
-        await axios.post(host + '/notifications/update', {id : notifId})
-        .then(() => {
-            getData()
-        })
+            await axios.post(host + '/notifications/update', {id : notifId})
+            .then(() => {
+                getData()
+            })
+        }else if(reexamId){
+            const res = await axios.post(host + '/reexams/update', {id : reexamId._id})
+            const doctor = res.data.doctorId
+            const dataSaved = {
+                sender: 'user',
+                userId : user.id,
+                doctorId: doctor._id,
+                title: 'Update the re-exam schedule',
+                body: user.fullname + ' has accepted your request to update the re-exam schedule! Please check your re-exam schedules!',
+                date: new Date()
+            }
+        
+            await axios.post(host + '/notifications/add', dataSaved)
+        
+            for(var token of doctor.tokens){
+                await sendUpdateNotification(token.tokenDevices, user.fullname);
+            }
+
+            await axios.post(host + '/notifications/update', {id : notifId})
+            .then(() => {
+                getData()
+            })
+        }
     }
 
     useEffect(() => {
@@ -175,7 +232,7 @@ export default function Notifications({navigation}){
                                 </Text>
                                 {!notif.status ?
                                 <View style={{flexDirection: 'row', marginLeft: 90}}>
-                                    <TouchableOpacity onPress={() => handleUpdate(notif.scheduleId._id, notif._id)}>
+                                    <TouchableOpacity onPress={() => handleUpdate(notif.scheduleId, notif.reexamId, notif._id)}>
                                         <View style={styles.button}>
                                             <LinearGradient
                                                 colors={['#CECCF5','#0970BE']}
@@ -185,7 +242,7 @@ export default function Notifications({navigation}){
                                             </LinearGradient>
                                         </View>
                                     </TouchableOpacity>   
-                                    <TouchableOpacity onPress={() => handleRefuse(notif.scheduleId._id, notif.doctorId, notif._id)}>
+                                    <TouchableOpacity onPress={() => handleRefuse(notif.scheduleId, notif.reexamId, notif.doctorId, notif._id)}>
                                         <View style={styles.button}>
                                             <LinearGradient
                                                 colors={['#D4919E','#C13815']}

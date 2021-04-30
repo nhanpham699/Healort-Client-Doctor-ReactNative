@@ -21,16 +21,19 @@ import DoctorLogin from './screens/DoctorScreen/DoctorLogin'
 import DoctorLoading from './screens/DoctorScreen/DoctorLoading'
 import ExamHistory from './screens/ClientScreen/ExamHistory'
 import Chat from './screens/ClientScreen/Chat'
+import DoctorChat from './screens/DoctorScreen/DoctorChat'
 import Patient from './screens/DoctorScreen/Patient'
 import Checkout from './screens/ClientScreen/Checkout'
 import DoctorSchedule from './screens/DoctorScreen/DoctorSchedule'
 import BusyDoctor from './screens/DoctorScreen/BusyDoctor'
-import DoctorChat from './screens/DoctorScreen/DoctorChat'
 import ExaminationSlip from './screens/ClientScreen/ExamSlip'
 import Doctor from './screens/ClientScreen/Doctor'
 import UpdateSchedules from './screens/UpdateSchedules'
+import UpdateReexam from './screens/UpdateReexam'
 import ReExam from  './screens/DoctorScreen/ReExam'
 import ReExamList from  './screens/ClientScreen/ReExamList'
+import DoctorReExam from  './screens/DoctorScreen/DoctorReExamList'
+
 import ShowExaminationSlip from './screens/ClientScreen/ShowExamSlip'
 
 
@@ -51,8 +54,9 @@ const App = () => {
             <Stack.Screen name="DoctorHome" component={DoctorHome} />           
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Doctor" component={Doctor} />
-            <Stack.Screen name="Chat" component={Chat} />
             <Stack.Screen name="MakeaApp" component={MakeaApp} />
+            <Stack.Screen name="Chat" component={Chat} />
+            <Stack.Screen name="DoctorChat" component={DoctorChat} />
             <Stack.Screen name="ExamHistory" component={ExamHistory} />
             <Stack.Screen name="Message" component={Message} />
             <Stack.Screen name="Schedule" component={Schedule} />
@@ -61,10 +65,11 @@ const App = () => {
             <Stack.Screen name="Patient" component={Patient} />
             <Stack.Screen name="ExaminationSlip" component={ExaminationSlip} />
             <Stack.Screen name="UpdateSchedules" component={UpdateSchedules} />
+            <Stack.Screen name="UpdateReexam" component={UpdateReexam} />
             <Stack.Screen name="BusyDoctor" component={BusyDoctor} />
-            <Stack.Screen name="DoctorChat" component={DoctorChat} />
             <Stack.Screen name="ReExam" component={ReExam} />
             <Stack.Screen name="ReExamList" component={ReExamList} />
+            <Stack.Screen name="DoctorReExam" component={DoctorReExam} />
             <Stack.Screen name="ShowExamSlip" component={ShowExaminationSlip} />
           </Stack.Navigator>
         </NavigationContainer>

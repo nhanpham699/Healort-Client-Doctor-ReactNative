@@ -90,6 +90,7 @@ export default function UpdateSchedules({navigation,route}) {
     const [dateArr, setDateArr] = useState(DATE_DATA)
     const [hourArr, setHourArr] = useState(HOUR_DATA)
     const [schedules, setSchedules] = useState([])
+    const [reexams, setReexams] = useState([])
     const [selectedHourId, setSelectedHourId] = useState(null);
     const [selectedDateId, setSelectedDateId] = useState(null);
     const [data, setData] = useState({
@@ -137,7 +138,7 @@ export default function UpdateSchedules({navigation,route}) {
         );
     };
     
-    const handleCheckDate = (schedule) => {
+    const handleCheckDate = (schedule, reexam) => {
         setDateArr(DATE_DATA)
         let arr = DATE_DATA
         let repeat = []
@@ -145,6 +146,14 @@ export default function UpdateSchedules({navigation,route}) {
         const scheduleArr = schedule.filter(dt => {
             return dt.doctorId._id == doctorId && dt.status == 0
         })
+
+        const reexamArr = reexam.filter(dt => {
+            return dt.doctorId._id == doctorId && dt.status == 0
+        })
+
+        for(let re of reexamArr){
+            scheduleArr.push(re)
+        }
 
         for(let sch of scheduleArr){
             for (let i = 0; i<dateArr.length; i++){
@@ -192,6 +201,9 @@ export default function UpdateSchedules({navigation,route}) {
             const scheduleArr = schedules.filter(dt => {
                 return dt.doctorId._id == doctorId && dt.status == 0
             })
+            for(let re of reexams){
+                scheduleArr.push(re)
+            }
             setSelectedDateId(item.id)
             setSelectedHourId(null)
             setData({...data, date: item.value, begin: 0})
@@ -209,7 +221,7 @@ export default function UpdateSchedules({navigation,route}) {
                     }
                  }
             }
-    }    
+    }       
     // Hour
     const getHour = (item) => {
         if(!data.date){
@@ -222,9 +234,14 @@ export default function UpdateSchedules({navigation,route}) {
 
     useEffect(() => {
         axios.get(host + '/schedules/getallschedules/')
-        .then(res => {
-            setSchedules(res.data)
-            handleCheckDate(res.data)
+        .then(res1 => {
+            axios.get(host + '/reexams/getallreexams/')
+            .then(res2 => {
+                setReexams(res2.data)
+                setSchedules(res1.data)
+                handleCheckDate(res1.data, res2.data)
+            })  
+
         })        
     },[])
 
