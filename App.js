@@ -13,8 +13,9 @@ import Home from './screens/ClientScreen/Home'
 import Loading from './screens/ClientScreen/Loading'
 import Register from './screens/ClientScreen/Register'
 import configureStore from './store'
-import MakeaApp from './screens/ClientScreen/MakeaApp';
+import MakeaApp from './screens/ClientScreen/MakeaApp'
 import Message from './screens/ClientScreen/Message'
+import DoctorMessage from './screens/DoctorScreen/DoctorMessage'
 import Schedule from './screens/ClientScreen/Schedules'
 import DoctorHome from './screens/DoctorScreen/DoctorHome'
 import DoctorLogin from './screens/DoctorScreen/DoctorLogin'
@@ -31,16 +32,16 @@ import Doctor from './screens/ClientScreen/Doctor'
 import UpdateSchedules from './screens/UpdateSchedules'
 import UpdateReexam from './screens/UpdateReexam'
 import ReExam from  './screens/DoctorScreen/ReExam'
-import ReExamList from  './screens/ClientScreen/ReExamList'
 import DoctorReExam from  './screens/DoctorScreen/DoctorReExamList'
-
 import ShowExaminationSlip from './screens/ClientScreen/ShowExamSlip'
-
+import Prescription from './screens/ClientScreen/Prescription'
+import DoctorExamHistory from './screens/DoctorScreen/DoctorExamHistory'
 
 const Stack = createStackNavigator();
 
 const store = configureStore()
 const App = () => {
+  
   return (
       <Provider store={store}>
         <NavigationContainer>   
@@ -58,7 +59,9 @@ const App = () => {
             <Stack.Screen name="Chat" component={Chat} />
             <Stack.Screen name="DoctorChat" component={DoctorChat} />
             <Stack.Screen name="ExamHistory" component={ExamHistory} />
+            <Stack.Screen name="DoctorExamHistory" component={DoctorExamHistory} />
             <Stack.Screen name="Message" component={Message} />
+            <Stack.Screen name="DoctorMessage" component={DoctorMessage} />
             <Stack.Screen name="Schedule" component={Schedule} />
             <Stack.Screen name="Checkout" component={Checkout} />
             <Stack.Screen name="DoctorSchedule" component={DoctorSchedule} />
@@ -68,9 +71,9 @@ const App = () => {
             <Stack.Screen name="UpdateReexam" component={UpdateReexam} />
             <Stack.Screen name="BusyDoctor" component={BusyDoctor} />
             <Stack.Screen name="ReExam" component={ReExam} />
-            <Stack.Screen name="ReExamList" component={ReExamList} />
             <Stack.Screen name="DoctorReExam" component={DoctorReExam} />
             <Stack.Screen name="ShowExamSlip" component={ShowExaminationSlip} />
+            <Stack.Screen name="Prescription" component={Prescription} />
           </Stack.Navigator>
         </NavigationContainer>
       </Provider>    

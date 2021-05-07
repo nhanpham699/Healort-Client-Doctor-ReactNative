@@ -13,7 +13,7 @@ import {
     KeyboardAvoidingView,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { NavigationActions } from 'react-navigation';
+import { getActiveChildNavigationOptions, NavigationActions } from 'react-navigation';
 
 import { Ionicons } from '@expo/vector-icons'; 
 import host from '../host'
@@ -85,8 +85,7 @@ const HourItem = ({ item, onPress, style }) => (
 
 export default function UpdateReexam({navigation,route}) {
     
-    const { id, user, doctorName, doctorId, actor, component } = route.params
-    console.log(user);
+    const { id, user, doctorName, doctorId, actor, component, notifId } = route.params
     const [dateArr, setDateArr] = useState(DATE_DATA)
     const [hourArr, setHourArr] = useState(HOUR_DATA)
     const [schedules, setSchedules] = useState([])
@@ -139,10 +138,28 @@ export default function UpdateReexam({navigation,route}) {
         );
     };
     
-    const handleCheckDate = (schedule, reexam) => {
+    const handleCheckDate = (schedule, reexam, absence) => {
         setDateArr(DATE_DATA)
         let arr = DATE_DATA
         let repeat = []
+
+        const absenceArr = absence.filter(dt => {
+            return dt.doctorId._id == doctorId 
+        })
+
+        for (let i = 0; i < dateArr.length; i++){
+            for(var a of absenceArr){
+                const b = a.dates.map(dt => { return (new Date(dt).toString().slice(0,15)) })
+                const c = (new Date(dateArr[i].value)).toString().slice(0,15)
+                if( b.indexOf(c) != -1 ){
+                    arr = [
+                        ...arr.slice(0,i), 
+                        {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
+                        ...arr.slice(i+1)
+                    ]
+                }
+            }
+        }   
 
         const scheduleArr = schedule.filter(dt => {
             return dt.doctorId._id == doctorId && dt.status == 0
@@ -165,7 +182,6 @@ export default function UpdateReexam({navigation,route}) {
                             {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
                             ...arr.slice(i+1)
                         ]
-                        setDateArr(arr)
                         break
                     }else{
                         let flag = false
@@ -191,6 +207,8 @@ export default function UpdateReexam({navigation,route}) {
                 }
             }
         }       
+        setDateArr(arr)
+
         setHourArr(HOUR_DATA)
     }
 
@@ -238,11 +256,13 @@ export default function UpdateReexam({navigation,route}) {
         .then(res1 => {
             axios.get(host + '/reexams/getallreexams/')
             .then(res2 => {
-                setReexams(res2.data)
-                setSchedules(res1.data)
-                handleCheckDate(res1.data, res2.data)
+                axios.get(host + '/absences/getallabsences')
+                .then(res3 => {
+                    setReexams(res2.data)
+                    setSchedules(res1.data)
+                    handleCheckDate(res1.data, res2.data, res3.data)
+                })
             })  
-
         })        
     },[])
 
@@ -293,12 +313,13 @@ export default function UpdateReexam({navigation,route}) {
                                     for(var token of doctor.tokens){
                                         await sendPushNotification(token.tokenDevices, actor, user.fullname);
                                     }
+                                    await axios.post(host + '/notifications/update', {id : notifId})
                                     await axios.post(host + '/notifications/add', dataSaved)
                                     if(component == 'notification'){
                                         navigation.goBack()
                                     }else{
                                         navigation.pop(1)
-                                        navigation.replace("ReExamList")
+                                        navigation.replace("Schedule")
                                     }
                             })
                         }

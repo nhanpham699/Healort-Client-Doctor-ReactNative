@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     View,
     SafeAreaView,
@@ -21,6 +21,7 @@ import Notification from './Notification'
 import Bar from './Bar'
 import TopDoctorCarousel from '../../components/TopDoctorCarousel'
 import Flatlist from '../../components/UserMenu'
+import { useState } from 'react';
 
 const MainScreen = () => {
     return (
@@ -52,6 +53,7 @@ const Tab = createBottomTabNavigator();
 
 
 export default function Home(){
+
     return (
         <Tab.Navigator 
          tabBarOptions={{
@@ -59,9 +61,9 @@ export default function Home(){
              showLabel: false,
              style: styles.tabmenu
          }}
-         initialRouteName="Home" >
+         initialRouteName={"Home"}>
             <Tab.Screen
-                name="Home"
+                name={"Home"}
                 component={MainScreen}
                 options={{
                 tabBarLabel: 'Home',
@@ -81,7 +83,7 @@ export default function Home(){
                 }}
             />
             <Tab.Screen
-                name="Notifications"
+                name={"Notifications"}
                 component={Notification}
                 options={{
                 tabBarLabel: 'Notification',

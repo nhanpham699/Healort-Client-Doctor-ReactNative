@@ -18,6 +18,8 @@ import { NavigationActions } from 'react-navigation';
 import { Ionicons } from '@expo/vector-icons'; 
 import host from '../host'
 import axios from 'axios'
+import { addNotif } from '../actions/notification';
+import {useDispatch} from 'react-redux'
 
 // Schedules Data
 
@@ -85,8 +87,8 @@ const HourItem = ({ item, onPress, style }) => (
 
 export default function UpdateSchedules({navigation,route}) {
     
-    const { id, user, doctorName, doctorId, actor, component } = route.params
-    console.log(user);
+    const dispatch = useDispatch()
+    const { id, user, doctorName, doctorId, actor, component, notifId } = route.params
     const [dateArr, setDateArr] = useState(DATE_DATA)
     const [hourArr, setHourArr] = useState(HOUR_DATA)
     const [schedules, setSchedules] = useState([])
@@ -138,11 +140,33 @@ export default function UpdateSchedules({navigation,route}) {
         );
     };
     
-    const handleCheckDate = (schedule, reexam) => {
+    const handleCheckDate = (schedule, reexam, absence) => {
         setDateArr(DATE_DATA)
         let arr = DATE_DATA
         let repeat = []
+        // console.log("aaaaaaaaaaaaaaaa", absence);
+        const absenceArr = absence.filter(dt => {
+            // console.log(dt.doctorId._id, doctorId);
+            return dt.doctorId._id == doctorId 
+        })
 
+        // console.log(absenceArr)
+
+        for (let i = 0; i < dateArr.length; i++){
+            for(var a of absenceArr){
+                const b = a.dates.map(dt => { return (new Date(dt).toString().slice(0,15)) })
+                const c = (new Date(dateArr[i].value)).toString().slice(0,15)
+                // console.log(b,c);
+                if( b.indexOf(c) != -1 ){
+                    arr = [
+                        ...arr.slice(0,i), 
+                        {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
+                        ...arr.slice(i+1)
+                    ]
+                }
+            }
+        }    
+    
         const scheduleArr = schedule.filter(dt => {
             return dt.doctorId._id == doctorId && dt.status == 0
         })
@@ -164,7 +188,6 @@ export default function UpdateSchedules({navigation,route}) {
                             {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
                             ...arr.slice(i+1)
                         ]
-                        setDateArr(arr)
                         break
                     }else{
                         let flag = false
@@ -182,14 +205,14 @@ export default function UpdateSchedules({navigation,route}) {
                                 {date: dateArr[i].value, re: ++repeat[index].re}, 
                                 ...repeat.slice(index+1)
                             ] 
-                            console.log(repeat);         
                         }else{
                             repeat.push({date: dateArr[i].value, re: 1})
                         }
                     }   
                 }
             }
-        }       
+        }
+        setDateArr(arr)       
         setHourArr(HOUR_DATA)
     }
 
@@ -237,9 +260,13 @@ export default function UpdateSchedules({navigation,route}) {
         .then(res1 => {
             axios.get(host + '/reexams/getallreexams/')
             .then(res2 => {
-                setReexams(res2.data)
-                setSchedules(res1.data)
-                handleCheckDate(res1.data, res2.data)
+                axios.get(host + '/absences/getallabsences')
+                .then(res3 => {
+                    setReexams(res2.data)
+                    setSchedules(res1.data)
+                    handleCheckDate(res1.data, res2.data, res3.data)
+                })
+               
             })  
 
         })        
@@ -268,7 +295,6 @@ export default function UpdateSchedules({navigation,route}) {
                                 status : 0,
                                 date: new Date()
                             }
-                            console.log(data);
                             await axios.post(host + '/schedules/confirmation', data)
                             for(var token of user.tokens){
                                 await sendPushNotification(token.tokenDevices, actor, doctorName);
@@ -292,9 +318,14 @@ export default function UpdateSchedules({navigation,route}) {
                                     for(var token of doctor.tokens){
                                         await sendPushNotification(token.tokenDevices, actor, user.fullname);
                                     }
+                                    await axios.post(host + '/notifications/update', {id : notifId})
                                     await axios.post(host + '/notifications/add', dataSaved)
                                     if(component == 'notification'){
+                                        const res = await axios.get(host + '/notifications/getnotificationsbyuser/' + user._id)
+                                        const newData = res.data.filter(dt => dt.sender == "doctor")
+                                        await dispatch(addNotif(newData))
                                         navigation.goBack()
+
                                     }else{
                                         navigation.pop(1)
                                         navigation.replace("Schedule")

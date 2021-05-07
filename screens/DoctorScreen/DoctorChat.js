@@ -12,10 +12,9 @@ import { useSelector } from 'react-redux';
 
 const ChatScreen = ({navigation,route}) => {
     const { doctor } = useSelector(state => state.doctors)
-
     const socket = io(host);
 
-
+    console.log(doctor);
     const [name, setName] = React.useState('');
     const [room, setRoom] = React.useState('');
     const [messages, setMessages] = React.useState([]);
@@ -109,7 +108,7 @@ const ChatScreen = ({navigation,route}) => {
             <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Ionicons style={styles.back} name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
-            <Text style={styles.headertext1}>Chat</Text> 
+            <Text style={styles.headertext1}>{doctor.fullname}</Text> 
         </View>
         <View style={styles.body}>  
         <GiftedChat
@@ -117,9 +116,8 @@ const ChatScreen = ({navigation,route}) => {
           onSend={(messages) => onSend(messages)}
           user={{
             _id: doctor.id,
-            name: doctor.fullname,
-            avatar: host + doctor.avatar
-
+            avatar: `${host}/${doctor.avatar}`,
+            name: doctor.fullname
           }}
           renderBubble={renderBubble}
           alwaysShowSend
@@ -169,12 +167,10 @@ const styles = StyleSheet.create({
   body: {
       flex: 1,
       justifyContent: 'center',
-
   },
 
   myMessage: {
       borderWidth: 1,
-
   },
 
   footer: {

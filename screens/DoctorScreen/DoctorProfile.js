@@ -16,7 +16,7 @@ import {
 import { TextInput } from 'react-native-gesture-handler'
 import { FontAwesome,Ionicons} from '@expo/vector-icons'; 
 import RNPickerSelect from "react-native-picker-select";
-
+import host from '../../host'
 
 
 
@@ -42,7 +42,13 @@ export default function Profile({navigation}) {
             
             <View style={styles.content}>          
                 <View style={styles.avatar}> 
-                    <FontAwesome name="user-circle-o" size={70} color="black" /> 
+                <Image 
+                source={{uri : host + doctor.avatar}} 
+                style={{ 
+                    width: 100,
+                    height: 100, 
+                    borderRadius: 50, 
+                }} /> 
                 </View> 
                 <View style={styles.infor}>
                     <View style={styles.infortextborder}>
@@ -150,7 +156,7 @@ var styles = StyleSheet.create({
         flexDirection: 'row',
         marginTop: 20,
         backgroundColor: 'white',
-        height: 100
+        height: 130
     },
     avatar: {
         marginTop: 15,
@@ -158,7 +164,7 @@ var styles = StyleSheet.create({
     },
     infor: {
         marginLeft: 25,
-        marginTop: 15,
+        marginTop: 27,
     },
     infortext: {
         // textTransform: 'uppercase',

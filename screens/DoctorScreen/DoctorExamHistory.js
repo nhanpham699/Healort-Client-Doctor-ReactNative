@@ -27,23 +27,14 @@ const Star = (props) => {
 const ExamHistory = ({navigation}) => {
 
 //   const dispatch = useDispatch()
-  const { user } = useSelector(state => state.users)
-  
-  const [modalVisible2, setModalVisible2] = useState({
-      id: "",
-      state: false
-  });
+  const { doctor } = useSelector(state => state.doctors)
   const [data, setData] = useState([])
  
   const stars = [1,2,3,4,5]
 
-  const handleReview = (id) => setModalVisible2({
-    id: id,
-    state: !modalVisible2.state
-  })
 
   const getAllSchedules = async() => {
-    const res = await axios.get(host + '/schedules/getallschedules/' + user.id)
+    const res = await axios.get(host + '/schedules/getallbydoctor/' + doctor.id)
     const newData = res.data.filter(dt => dt.status === 1)
     setData(newData)
   }
@@ -81,20 +72,7 @@ const ExamHistory = ({navigation}) => {
                     </View>
                 ))} 
                 </View>
-                {!sch.doctorId.review.find(x => x.scheduleId == sch._id) ?   
-                <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                    <TouchableOpacity onPress={() => handleReview(sch._id)}>
-                        <View style={[styles.button,{marginRight: 20}]}>
-                            <LinearGradient
-                                colors={['#D4919E','#C13815']}
-                                style={styles.update}
-                            >
-                                <Text style={styles.update_text}>Rate</Text>
-                            </LinearGradient>
-                        </View>
-                    </TouchableOpacity> 
-                </View>
-                : 
+                {sch.doctorId.review.find(x => x.scheduleId == sch._id) &&
                 <View style={{flexDirection: 'row'}}>
                   {stars.map(star => (
                       <View key={star}>
@@ -102,14 +80,6 @@ const ExamHistory = ({navigation}) => {
                       </View>
                   ))}
                 </View>
-                }
-                {sch._id == modalVisible2.id && modalVisible2 &&
-                <ReviewModal
-                scheduleId={sch._id} 
-                setData={getAllSchedules} 
-                data={sch.doctorId} 
-                modal={modalVisible2} 
-                setModal={handleReview} /> 
                 }
               </List.Accordion>
             ))}

@@ -19,6 +19,8 @@ const ratingTotal = (rate) => {
     return total
 }
 
+
+
 const DoctorCarousel = (props) => {
 
     const { onPress, doctorChecked } = props
@@ -27,10 +29,20 @@ const DoctorCarousel = (props) => {
 
     const getdoctors = async() => {
         const res = await axios.get(host + '/doctors/getbaddoctor')
-        const dataFilter = res.data.map(dt => {
+        let dataFilter = res.data.map(dt => {
             return {...dt, review: ratingTotal(dt.review)}
         })
-        setData(dataFilter)
+
+        if(doctorChecked.id){
+              const index = dataFilter.indexOf(dataFilter.find(x => x._id == doctorChecked.id))
+              console.log(index)
+              let data = [...dataFilter];
+              let temp = data[0];
+              data[0] = data[index];
+              data[index] = temp;
+              console.log(data);
+              setData(data)
+        }else setData(dataFilter)
     }
 
     useEffect(() => {

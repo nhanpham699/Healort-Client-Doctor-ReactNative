@@ -18,47 +18,29 @@ import host from '../../host'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
 
-const Messages = [
-  {
-    id: '1',
-    userName: 'Rose',
-    userImg: require('../../assets/rose.jpg'),
-    messageTime: '4 mins ago',
-    messageText: 'Hey there, this is my test for a post of my social app in React Native.',
-  },
-  {
-    id: '2',
-    userName: 'Lisa',
-    userImg: require('../../assets/lisa.jpg'),
-    messageTime: '2 hours ago',
-    messageText: 'Hey there, this is my test for a post of my social app in React Native.',
-  }
-];
-
 const MessagesScreen = ({navigation}) => {
 
     const [messages, setMessages] = useState([])
-    const { user } = useSelector(state => state.users)
+    const { doctor } = useSelector(state => state.doctors)
 
     const getMessages = async() => {
-        const doctorsList = []
-        const res = await axios.get(host + '/chats/getUserListMessages/' + user.id)
+        const usersList = []
+        const res = await axios.get(host + '/chats/getDoctorListMessages/' + doctor.id)
         const dataFilter = res.data.filter(dt => dt.messages.length != 0)
         for(let i of dataFilter){
           const { room } = i
-          console.log(i);
-          const doctorId = room.slice(0, room.indexOf('_'))
-          const doctor = await axios.get(host + '/doctors/getdoctorbyid/' + doctorId)
+          const userId = room.slice(room.indexOf('_') + 1)
+          const user = await axios.get(host + '/users/getuserbyid/' + userId)
           const newData = {
-            ...doctor.data, 
+            ...user.data, 
             messageTime: (new Date(i.messages[0].createdAt).toString().slice(16,21)) + " " 
                         + (new Date(i.messages[0].createdAt).getDate()) + '/'
                         + (new Date(i.messages[0].createdAt).getMonth()+1), 
             messageText: i.messages[0].text
           }
-          doctorsList.push(newData)
+          usersList.push(newData)
         }
-        const newData = doctorsList.map(dt => {
+        const newData = usersList.map(dt => {
             return {
               _id: dt._id,
               fullname: dt.fullname,
@@ -88,7 +70,7 @@ const MessagesScreen = ({navigation}) => {
                 data={messages}
                 keyExtractor={item=>item._id}
                 renderItem={({item}) => (
-                    <Card onPress={() => navigation.navigate('Chat', {doctor: item})}>
+                    <Card onPress={() => navigation.navigate('DoctorChat', {user: item})}>
                     <UserInfo>
                         <UserImgWrapper>
                         <UserImg source={{uri : host + item.avatar}} />

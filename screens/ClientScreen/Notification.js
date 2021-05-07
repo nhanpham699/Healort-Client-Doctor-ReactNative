@@ -6,7 +6,8 @@ import {
     TouchableOpacity,
     StatusBar,
     Image,
-    Alert
+    Alert,
+    ScrollView
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'; 
 import { LinearGradient } from 'expo-linear-gradient'
@@ -14,46 +15,69 @@ import {useSelector, useDispatch} from 'react-redux'
 import {addDoctorInfor} from '../../actions/doctor.infor'
 import axios from 'axios';
 import host from '../../host';
+import ScheduleModal from '../../components/ScheduleModal'
 
 export default function Notifications({navigation}){
+
+    const { notification } = useSelector(state => state.notifications)
+
+
+    const [modalVisible, setModalVisible] = useState({
+        id: "",
+        state: false
+    });
     const dispatch = useDispatch()
     const { user } = useSelector(state => state.users)
-    const [data, setData] = useState([])
+    const [data, setData] = useState(notification ? notification : [])
     const getData = async () => {
         const res = await axios.get(host + '/notifications/getnotificationsbyuser/' + user.id)
         const newData = res.data.filter(dt => dt.sender == "doctor")
         setData(newData)
     }
 
+    const handleModal = (id) => {
+        setModalVisible({
+            id: id,
+            state: !modalVisible.state
+        })
+     }
+
     const handleRefuse = (scheduleId, reexamId, doctor, notifId) => {
+        
         Alert.alert(
             "Update or delete your schedule",
             "Click 'Update' if you want to update the schedule. Click 'Delete' if you want to remove the schedule",
             [
               { text: "Update", onPress: async() => {
-                        await axios.post(host + '/notifications/update', {id : notifId})
-                        .then(() => {
-                            getData()
-                            if(scheduleId){
-                                navigation.navigate("UpdateSchedules", {
-                                    id: scheduleId, 
-                                    doctorName: doctor.fullname, 
-                                    doctorId: doctor._id, 
-                                    actor: 'user',
-                                    component: 'notification'
-                                })
-                            }else if(reexamId){
-                                navigation.navigate("UpdateReexam", {
-                                    id: reexamId, 
-                                    doctorName: doctor.fullname, 
-                                    doctorId: doctor._id, 
-                                    actor: 'user',
-                                    component: 'notification'
-                                })
-                            }
-                        })
+                        setModalVisible({
+                            id: "",
+                            state: !modalVisible.state
+                        })    
+                        if(scheduleId){
+                            navigation.navigate("UpdateSchedules", {
+                                id: scheduleId._id, 
+                                doctorName: doctor.fullname, 
+                                doctorId: doctor._id, 
+                                actor: 'user',
+                                component: 'notification',
+                                notifId: notifId
+                            })
+                        }else if(reexamId){
+                            navigation.navigate("UpdateReexam", {
+                                id: reexamId._id, 
+                                doctorName: doctor.fullname, 
+                                doctorId: doctor._id, 
+                                actor: 'user',
+                                component: 'notification',
+                                notifId: notifId
+                            })
+                        }
               } }, 
               { text: "Delete", onPress: async() => {
+                    setModalVisible({
+                        id: "",
+                        state: !modalVisible.state
+                    })
                     if(scheduleId){
                         await axios.post(host + "/schedules/delete", {id: scheduleId._id})
                    
@@ -109,6 +133,10 @@ export default function Notifications({navigation}){
     }
 
     const handleUpdate = async(scheduleId, reexamId, notifId) => {
+        setModalVisible({
+            id: "",
+            state: !modalVisible.state
+        })
         if(scheduleId){
             const res = await axios.post(host + '/schedules/update', {id : scheduleId._id})
             const doctor = res.data.doctorId
@@ -158,8 +186,7 @@ export default function Notifications({navigation}){
 
     useEffect(() => {
         getData()
-    },[])
-
+    },[notification])
 
     async function sendUpdateNotification(expoPushToken, username) {
         const message = {
@@ -191,7 +218,7 @@ export default function Notifications({navigation}){
           data: { someData: 'goes here' },
         };
         
-
+        
         await fetch('https://exp.host/--/api/v2/push/send', {
           method: 'POST',
           headers: {
@@ -203,6 +230,8 @@ export default function Notifications({navigation}){
         });
       }
 
+      console.log(data);
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
@@ -212,62 +241,62 @@ export default function Notifications({navigation}){
                 </TouchableOpacity>
                 <Text style={styles.headertext1}>Notifications</Text> 
             </View>
-            <View style={styles.content}>
+            <ScrollView style={styles.content}>
                 {data.map((notif,index) => (
-                    <View style={styles.item} key={index}>
-                        <View style={{width: '25%'}}>
-                            <Image 
-                            source={{uri : host + notif.doctorId.avatar}}
-                            style={styles.image} />
-                        </View>
-                        <View style={{width: '75%', marginTop: 7}}> 
-                            <View>
-                                <Text style={styles.textbody}>{notif.body}</Text>
+                        <View  key={index} style={styles.item} >
+                            <View style={{width: '25%'}}>
+                                <Image 
+                                source={{uri : host + notif.doctorId.avatar}}
+                                style={styles.image} />
                             </View>
-                            <View style={{flexDirection:'row'}}>
-                                <Text style={styles.textdate}>
-                                {new Date(notif.date).toString().slice(16,21) + ' ' 
-                                + (new Date(notif.date)).getDate() + '-' 
-                                + ((new Date(notif.date)).getMonth() + 1) }
-                                </Text>
-                                {!notif.status ?
-                                <View style={{flexDirection: 'row', marginLeft: 90}}>
-                                    <TouchableOpacity onPress={() => handleUpdate(notif.scheduleId, notif.reexamId, notif._id)}>
-                                        <View style={styles.button}>
+                            <View style={{width: '75%', marginTop: 7}}> 
+                                <View>
+                                    <Text style={styles.textbody}>{notif.body}</Text>
+                                </View>
+                                <View style={{flexDirection: 'row'}}>
+                                    
+                                    <Text style={styles.textdate}>
+                                    {new Date(notif.date).toString().slice(16,21) + ' ' 
+                                    + (new Date(notif.date)).getDate() + '-' 
+                                    + ((new Date(notif.date)).getMonth() + 1) }
+                                    </Text>
+                                    {(notif.status == 1) ?
+                                    <View style={{position: 'absolute', right: 0}}>
+                                        <LinearGradient
+                                            colors={['#76b852','#8DC26F']}
+                                            style={[styles.update, {width: 100}]}
+                                        >
+                                            <Text style={styles.update_text}>confirmed</Text>
+                                        </LinearGradient>
+                                    </View>
+                                    :
+                                    <TouchableOpacity style={{position: 'absolute', right: 0}} onPress={() => handleModal(notif._id)}>
+                                        <View>
                                             <LinearGradient
                                                 colors={['#CECCF5','#0970BE']}
-                                                style={styles.update}
+                                                style={[styles.update, {width: 100}]}
                                             >
-                                                <Text style={styles.update_text}>Yes</Text>
+                                                <Text style={styles.update_text}>Handle</Text>
                                             </LinearGradient>
                                         </View>
-                                    </TouchableOpacity>   
-                                    <TouchableOpacity onPress={() => handleRefuse(notif.scheduleId, notif.reexamId, notif.doctorId, notif._id)}>
-                                        <View style={styles.button}>
-                                            <LinearGradient
-                                                colors={['#D4919E','#C13815']}
-                                                style={styles.update}
-                                            >
-                                                <Text style={styles.update_text}>No</Text>
-                                            </LinearGradient>
-                                        </View>
-                                    </TouchableOpacity> 
+                                    </TouchableOpacity>
+                                    }
                                 </View>
-                                : 
-                                <View style={{marginLeft: 100}}>
-                                    <LinearGradient
-                                        colors={['#76b852','#8DC26F']}
-                                        style={[styles.update, {width: 100}]}
-                                    >
-                                        <Text style={styles.update_text}>confirmed</Text>
-                                    </LinearGradient>
-                                </View>
-                                }
                             </View>
+                            {modalVisible.state && modalVisible.id == notif._id &&
+                            <ScheduleModal 
+                            handleUpdate={handleUpdate}
+                            handleRefuse={handleRefuse}
+                            schedule={notif.scheduleId}
+                            reexam={notif.reexamId}
+                            data={notif.scheduleId ? notif.scheduleId : notif.reexamId} 
+                            doctor={notif.doctorId}
+                            notif={notif._id}
+                            modal={modalVisible} 
+                            setModal={handleModal} /> }
                         </View>
-                    </View>
                 ))}
-            </View>
+            </ScrollView>
         </View>
     )
 }

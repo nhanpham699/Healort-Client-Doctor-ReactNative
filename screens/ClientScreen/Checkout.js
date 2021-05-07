@@ -60,6 +60,7 @@ export default function Checkout({navigation, route}){
                             body: user.fullname + ' maked an appoinment for you!',
                             date: new Date()
                         }
+                        
                         const doctors = await axios.get(host + '/doctors/gettopdoctor')
                         await dispatch(addDoctorInfor(doctors.data))
                         await axios.post(host + '/notifications/add', dataSaved)

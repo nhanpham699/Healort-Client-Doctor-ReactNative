@@ -92,6 +92,7 @@ export default function MakeaApp({navigation, route}) {
     const [hourArr, setHourArr] = useState(HOUR_DATA)
     const [schedules, setSchedules] = useState([])
     const [reexams, setReexams] = useState([])
+    const [absences, setAbsences ] = useState([])
     const [selectedHourId, setSelectedHourId] = useState(null);
     const [selectedDateId, setSelectedDateId] = useState(null);
     const [data, setData] = useState({
@@ -103,6 +104,7 @@ export default function MakeaApp({navigation, route}) {
         userId: user.id,
         status: 0
     })    
+
     const [doctorChecked, setDoctorChecked] = useState({
         id : doctorId,
         isChecked: doctorId ? true : false
@@ -148,6 +150,9 @@ export default function MakeaApp({navigation, route}) {
     };
     
     const chooseDoctor = (value) => {
+
+        
+
         setDoctorChecked({
             id: value,
             isChecked: true
@@ -155,6 +160,26 @@ export default function MakeaApp({navigation, route}) {
         setDateArr(DATE_DATA)
         let arr = DATE_DATA
         let repeat = []
+
+        const absenceArr = absences.filter(dt => {
+            return dt.doctorId._id == value 
+        })
+
+        for (let i = 0; i < dateArr.length; i++){
+            for(var a of absenceArr){
+                const b = a.dates.map(dt => { return (new Date(dt).toString().slice(0,15)) })
+                const c = (new Date(dateArr[i].value)).toString().slice(0,15)
+                if( b.indexOf(c) != -1 ){
+                    arr = [
+                        ...arr.slice(0,i), 
+                        {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
+                        ...arr.slice(i+1)
+                    ]
+                }
+            }
+        }        
+
+       
 
         const scheduleArr = schedules.filter(dt => {
             return dt.doctorId._id == value && dt.status == 0
@@ -168,8 +193,10 @@ export default function MakeaApp({navigation, route}) {
             scheduleArr.push(re)
         }
 
+
+
         for(let sch of scheduleArr){
-            for (let i = 0; i<dateArr.length; i++){
+            for (let i = 0; i < dateArr.length; i++){
                 if(new Date(sch.date).toString().slice(0,15) == dateArr[i].value.toString().slice(0,15)){        
                     if(repeat.find(e => e.date == dateArr[i].value && e.re+1 == 5)){
                         arr = [
@@ -177,7 +204,6 @@ export default function MakeaApp({navigation, route}) {
                             {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
                             ...arr.slice(i+1)
                         ]
-                        setDateArr(arr)
                         break
                     }else{
                         let flag = false
@@ -194,8 +220,7 @@ export default function MakeaApp({navigation, route}) {
                                 ...repeat.slice(0,index), 
                                 {date: dateArr[i].value, re: ++repeat[index].re}, 
                                 ...repeat.slice(index+1)
-                            ] 
-                            console.log(repeat);         
+                            ]          
                         }else{
                             repeat.push({date: dateArr[i].value, re: 1})
                         }
@@ -203,6 +228,7 @@ export default function MakeaApp({navigation, route}) {
                 }
             }
         }       
+        setDateArr(arr)
         setHourArr(HOUR_DATA)
         setIsChecked({
             first: false,
@@ -257,6 +283,12 @@ export default function MakeaApp({navigation, route}) {
             }
         }   
     }    
+
+    const getAllAbsences = async() => {
+        const res = await axios.get(host + '/absences/getallabsences')
+        setAbsences(res.data)
+    }
+
     // Hour
     const getHour = (item) => {
         setIsChecked({
@@ -283,6 +315,8 @@ export default function MakeaApp({navigation, route}) {
         .then(res => {
             setReexams(res.data)
         })  
+
+        getAllAbsences()
 
     },[])
 

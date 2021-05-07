@@ -80,7 +80,7 @@ const HourItem = ({ item, onPress, style }) => (
 
 export default function ReExam({navigation, route}) {
 
-    const { doctor, userId, scheduleId } = route.params 
+    const { doctor, userId, scheduleId, reexam } = route.params 
     const [dateArr, setDateArr] = useState(DATE_DATA)
     const [hourArr, setHourArr] = useState(HOUR_DATA)
     const [schedules, setSchedules] = useState([])
@@ -135,10 +135,28 @@ export default function ReExam({navigation, route}) {
         );
     };
     
-    const handleCheckDate = (schedule, reexam) => {
+    const handleCheckDate = (schedule, reexam, absence) => {
         setDateArr(DATE_DATA)
         let arr = DATE_DATA
         let repeat = []
+
+        const absenceArr = absence.filter(dt => {
+            return dt.doctorId._id == data.doctorId 
+        })
+
+        for (let i = 0; i < dateArr.length; i++){
+            for(var a of absenceArr){
+                const b = a.dates.map(dt => { return (new Date(dt).toString().slice(0,15)) })
+                const c = (new Date(dateArr[i].value)).toString().slice(0,15)
+                if( b.indexOf(c) != -1 ){
+                    arr = [
+                        ...arr.slice(0,i), 
+                        {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
+                        ...arr.slice(i+1)
+                    ]
+                }
+            }
+        }    
 
         const scheduleArr = schedule.filter(dt => {
             return dt.doctorId._id == data.doctorId && dt.status == 0
@@ -161,7 +179,6 @@ export default function ReExam({navigation, route}) {
                             {id: i.toString(), value: dateArr[i].value , title: dateArr[i].title, state: false}, 
                             ...arr.slice(i+1)
                         ]
-                        setDateArr(arr)
                         break
                     }else{
                         let flag = false
@@ -187,6 +204,7 @@ export default function ReExam({navigation, route}) {
                 }
             }
         }       
+        setDateArr(arr)
         setHourArr(HOUR_DATA)
     }
 
@@ -219,6 +237,7 @@ export default function ReExam({navigation, route}) {
                  }
             }
     }    
+    
     // Hour
     const getHour = (item) => {
         if(!data.date){
@@ -234,9 +253,13 @@ export default function ReExam({navigation, route}) {
         .then(res1 => {
             axios.get(host + '/reexams/getallreexams/')
             .then(res2 => {
-                setReexams(res2.data)
-                setSchedules(res1.data)
-                handleCheckDate(res1.data, res2.data)
+                axios.get(host + '/absences/getallabsences')
+                .then(res3 => {
+                    setReexams(res2.data)
+                    setSchedules(res1.data)
+                    handleCheckDate(res1.data, res2.data, res3.data)
+                })
+               
             })  
 
         })        
@@ -256,7 +279,9 @@ export default function ReExam({navigation, route}) {
                     [
                       { text: "OK", onPress: () => {
                             navigation.pop(1)
-                            navigation.replace('DoctorSchedule')
+                            if(reexam == 'ManyReexam'){
+                                navigation.replace('DoctorReExam')                                
+                            }else navigation.replace('DoctorSchedule')
                         }}
                     ]
                 );

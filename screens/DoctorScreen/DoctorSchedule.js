@@ -114,27 +114,29 @@ const DoctorSchedule = ({navigation}) => {
                           </LinearGradient>
                       </View>
                   :
-                  <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.userId, sch.doctorId.fullname, sch.doctorId._id)}>
-                      <View style={styles.button}>
-                          <LinearGradient
-                              colors={['#CECCF5','#0970BE']}
-                              style={styles.update}
-                          >
-                              <Text style={styles.update_text}>Update</Text>
-                          </LinearGradient>
-                      </View>
-                  </TouchableOpacity>   
-                  }
-                  <TouchableOpacity onPress={() => handleExamed(sch._id)}>
-                      <View style={styles.button}>
-                          <LinearGradient
-                              colors={['#D4919E','#C13815']}
-                              style={styles.update}
-                          >
-                              <Text style={styles.update_text}>Examed</Text>
-                          </LinearGradient>
-                      </View>
-                  </TouchableOpacity>  
+                  <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                    <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.userId, sch.doctorId.fullname, sch.doctorId._id)}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#CECCF5','#0970BE']}
+                                style={styles.update}
+                            >
+                                <Text style={styles.update_text}>Update</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>   
+                    <TouchableOpacity onPress={() => handleExamed(sch._id)}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#D4919E','#C13815']}
+                                style={styles.update}
+                            >
+                                <Text style={styles.update_text}>Examed</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity> 
+                  </View>
+                  } 
                 </View> 
                 }
                 <PrescriptionModal 

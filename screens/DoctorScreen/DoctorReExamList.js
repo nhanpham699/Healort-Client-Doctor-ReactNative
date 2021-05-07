@@ -30,17 +30,26 @@ export default function ReExam({navigation}) {
   }
 
   const handleExamed = async(id) => {
-      console.log(id);
+      // console.log(id);
       await axios.post(host + '/reexams/examed', {id: id})
       .then(() => {
           getAllSchedules()
       })
   }
 
+  const handleReExam = async(sch) => {
+      navigation.navigate("ReExam", {
+        doctor: sch.doctorId,
+        userId: sch.userId._id, 
+        scheduleId: sch.scheduleId._id,
+        reexam: 'ManyReexam'
+      })
+  }
+
   const getAllSchedules = async() => {
     const res = await axios.get(host + '/reexams/getallreexamsbydoctor/' + doctor.id)
-    const newData = res.data.filter(dt => dt.status == 0)
-    setData(newData)
+    // const newData = res.data.filter(dt => dt.status == 0)
+    setData(res.data)
   }
 
   useEffect(() => {
@@ -90,6 +99,7 @@ export default function ReExam({navigation}) {
                       </View>
                   </TouchableOpacity>   
                   }  
+                  {!sch.status ?
                   <TouchableOpacity onPress={() => handleExamed(sch._id)}>
                       <View style={styles.button}>
                           <LinearGradient
@@ -99,7 +109,19 @@ export default function ReExam({navigation}) {
                               <Text style={styles.update_text}>Examed</Text>
                           </LinearGradient>
                       </View>
-                  </TouchableOpacity>  
+                  </TouchableOpacity>
+                  :
+                  <TouchableOpacity onPress={() => handleReExam(sch)}>
+                      <View style={styles.button}>
+                          <LinearGradient
+                              colors={['#CECCF5','#0970BE']}
+                              style={styles.update}
+                          >
+                              <Text style={styles.update_text}>re-exam {sch.times + 1}</Text>
+                          </LinearGradient>
+                      </View>
+                  </TouchableOpacity>
+                    }
                 </View> 
               </List.Accordion>
             ))}
@@ -139,7 +161,7 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: 30,
-    width: 75,
+    width: 80,
     borderRadius: 10,
     marginRight: 10,
     marginTop: 10

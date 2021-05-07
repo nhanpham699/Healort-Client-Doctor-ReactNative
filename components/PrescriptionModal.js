@@ -29,7 +29,7 @@ export default PresctiptionModal = (props,{navigation}) => {
   // const [number, setNumber] = useState([1])
   const [pres, setPres] = useState({
       date: new Date(),
-      medicine: [{value: "", quantity: 1, price: 0}],
+      medicine: [{name: "", value: "", quantity: 1, price: 0}],
       scheduleId: data._id,
       doctorId: data.doctorId._id,
       userId: data.userId._id,
@@ -46,11 +46,12 @@ export default PresctiptionModal = (props,{navigation}) => {
   }
 
   const getMedicine = async(value, index) => {
-      const res = await axios.get(host + '/medicines/getpricebyid/' + value)
-      const price = res.data
+      const res = await axios.get(host + '/medicines/getmedicinebyid/' + value)
+      const { price, name }  = res.data
       const arr = [...pres.medicine]
       arr[index].value = value;
       arr[index].price = price;
+      arr[index].name = name
       const total = calculateTotal(arr, pres.times)
       setPres({...pres, medicine: arr, total: total})
   }
@@ -77,7 +78,7 @@ export default PresctiptionModal = (props,{navigation}) => {
   }
 
   const addMedicine = () => {
-      setPres({...pres, medicine: [...pres.medicine, {value: "", quantity: 1, price: 0}]})
+      setPres({...pres, medicine: [...pres.medicine, {name: "", value: "", quantity: 1, price: 0}]})
   }
 
   const removeMedicine = (index) => {
