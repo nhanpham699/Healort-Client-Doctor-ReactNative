@@ -27,7 +27,9 @@ const TopCarouselCardItem = ({ item, index }) => {
           <Text style={styles.text}>Birth Year:  {item.birthyear}</Text>
           <Text style={styles.text}>Phone:  {item.phone}</Text>
           <View style={{ flexDirection: 'row'}}>
-              <Text style={styles.text}>Review:  {item.review} <AntDesign name="star" size={13} color="black" /></Text>
+              {item.review ? <Text style={styles.text}>Review:  {item.review} <AntDesign name="star" size={13} color="black" /></Text> 
+              :
+              <Text style={styles.text}>Review: Not yet</Text> }
               {/* <TouchableOpacity>
                 <View style={styles.chat}>
                     <Text style={styles.chat_text}>Chat</Text>

@@ -65,6 +65,7 @@ const MessagesScreen = ({navigation}) => {
                 <Text style={styles.headertext1}>Messages</Text> 
             </View>
             <Container>
+                {messages.length ? 
                 <FlatList 
                 style={{marginTop: 20}}  
                 data={messages}
@@ -85,7 +86,9 @@ const MessagesScreen = ({navigation}) => {
                     </UserInfo>
                     </Card>
                 )}
-                />
+                />  : <View style={{marginTop: '50%', alignItems: 'center'}}>
+                        <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
+                      </View> }
         </Container>
       </View>  
     );

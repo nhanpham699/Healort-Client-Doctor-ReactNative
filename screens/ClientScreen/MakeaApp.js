@@ -305,7 +305,6 @@ export default function MakeaApp({navigation, route}) {
     }
 
     useEffect(() => {
-
         axios.get(host + '/schedules/getallschedules')
         .then(res => {
             setSchedules(res.data)
@@ -316,8 +315,7 @@ export default function MakeaApp({navigation, route}) {
             setReexams(res.data)
         })  
 
-        getAllAbsences()
-
+        getAllAbsences()    
     },[])
 
     const make = async() => {

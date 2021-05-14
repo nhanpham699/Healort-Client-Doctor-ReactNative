@@ -135,7 +135,10 @@ export default function Patient({navigation}){
                 value={searchQuery}
                 style={styles.search_bar}
                 />
-                <Flatlist data={data} />
+                {data.length ? <Flatlist data={data} />  
+                : <View style={{marginTop: '50%', alignItems: 'center'}}>
+                    <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
+                  </View> }
             </View>
         </View>
     )

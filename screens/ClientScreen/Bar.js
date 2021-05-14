@@ -5,7 +5,7 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Button,
+    Image,
     AsyncStorage,
     ScrollView,
     ImageBackground
@@ -13,9 +13,12 @@ import {
 import host from '../../host'
 import axios from 'axios'
 import { FontAwesome, AntDesign, Feather } from '@expo/vector-icons'; 
+import { useSelector } from 'react-redux';
 
 
 export default function Bar({navigation}){
+
+    const { user } = useSelector(state => state.users)
 
     const logout = async () => {
         const UserToken = await AsyncStorage.getItem('UserToken')
@@ -31,19 +34,20 @@ export default function Bar({navigation}){
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../../assets/bg.jpg')} style={styles.header}>
-                <FontAwesome style={styles.profile} name="user-circle-o" size={75} color="black" /> 
-                <Text style={styles.name}>Pham Phuoc Nhan</Text>
+                <Image style={{width: 100, height: 100, borderRadius: 50, marginLeft: 30}} source={{uri : host + user.avatar}} /> 
+                <Text style={styles.name}>{user.fullname}</Text>
             </ImageBackground>
             <View style={styles.footer}>
+                <ImageBackground source={require('../../assets/bgbottom.png')} style={styles.header}>
                 <ScrollView>
-                    <View style={styles.menubar}>
-                        <Text style={styles.menutext}>Home</Text>
-                    </View>
                     <View style={styles.menubar}>
                         <Text style={styles.menutext}>Profile</Text>
                     </View>
                     <View style={styles.menubar}>
-                        <Text style={styles.menutext}>Schedules</Text>
+                        <Text style={styles.menutext}>Introducion</Text>
+                    </View>
+                    <View style={styles.menubar}>
+                        <Text style={styles.menutext}>Terms</Text>
                     </View>
                     <View style={styles.menubar}>
                         <TouchableOpacity onPress={logout}>
@@ -51,6 +55,7 @@ export default function Bar({navigation}){
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
+                </ImageBackground>
             </View>
         </View>
     )
@@ -62,21 +67,17 @@ const styles = StyleSheet.create({
     },
     header: {
         flex: 1,
-        paddingTop: 10
+        paddingTop: 35
     },  
-    profile: {
-        marginTop: 30,
-        marginLeft: 30
-    },
     footer: {
-        paddingTop: 25,
+        // paddingTop: 25,
         flex: 3
     },
     name: {
         fontSize: 20,
         fontWeight: '600',
-        marginVertical: 8,
-        marginLeft: 27
+        marginVertical: 14,
+        marginLeft: 30
     },
     menubar: {
         // height: 60,
@@ -90,7 +91,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         // backgroundColor: 'white',
         lineHeight: 40,
-        paddingLeft: 15,
-        borderRadius: 5,
+        paddingLeft: 20,
     }
 })

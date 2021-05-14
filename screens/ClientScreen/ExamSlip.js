@@ -124,7 +124,7 @@ export default function ExamSlip({navigation, route}){
                             colors={['#99ffff', '#80ffff']}
                             style={styles.make}
                         >
-                            <Text style={styles.make_text}>Completed</Text>
+                            <Text style={styles.make_text}>Complete</Text>
                         </LinearGradient>
                     </View>
                 </TouchableOpacity> 

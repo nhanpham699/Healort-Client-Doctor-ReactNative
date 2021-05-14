@@ -268,12 +268,12 @@ export default function Profile({navigation}) {
                             locale="tr" 
                             onSelect={value => setDataUpdate({...dataUpdate, date: value})}
                             isHideOnSelect={true}
-                            // language={require('./locales/en.json')}
+                            language={require('../../locales/en.json')}
                             initialDate={new Date()}
                         /> }
                     </View>
                     <TextInput 
-                        value={dataUpdate.date ? dataUpdate.date.toString().slice(0,15) : ''}
+                        value={dataUpdate.date ? dataUpdate.date.toString().slice(0,10) : ''}
                         editable={false}
                         placeholder="Your date birth" 
                         style={styles.text_input} 

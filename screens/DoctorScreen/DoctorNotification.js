@@ -41,7 +41,7 @@ export default function Notifications({navigation}){
                 <Text style={styles.headertext1}>Notifications</Text> 
             </View>
             <ScrollView style={styles.content}>
-                {data.map((notif,index) => (
+                {data.length ? data.map((notif,index) => (
                     <View style={styles.item} key={index}>
                         <View style={{width: '25%'}}>
                             <Image 
@@ -61,7 +61,9 @@ export default function Notifications({navigation}){
                             </View>
                         </View>
                     </View>
-                ))}
+                ))  : <View style={{marginTop: '50%', alignItems: 'center'}}>
+                        <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
+                      </View> }
             </ScrollView>
         </View>
     )

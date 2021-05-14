@@ -5,12 +5,10 @@ import {
     Text,
     StyleSheet,
     StatusBar, 
-    Dimensions,
+    Alert,
     TouchableOpacity,
     TextInput,
-    AsyncStorage,
-    Button,
-    Platform,
+    KeyboardAvoidingView,
     ScrollView
 } from 'react-native'
 
@@ -125,116 +123,126 @@ export default function Register({navigation}){
            !validation.fullname &&
            !validation.phone){
                 axios.post(host + '/users/signup', response)
-                .then(() => navigation.navigate('Login'))
+                .then(() => {
+                    Alert.alert(
+                        "Sign up!",
+                        "successfully!",
+                        [
+                          { text: "OK", onPress: () => navigation.navigate('Login') }
+                        ]
+                      );
+                })
             }else alert('sign up failed!')
     }
 
     return(
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" />
-            <View style={styles.header}>
-                <Text style={styles.title}>Register</Text>
-            </View>
-            <Animatable.View style={styles.footer} animation='fadeInUpBig'>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                    
-                    <Text style={styles.text_footer}>Email</Text>
-                    <View style={styles.action}>
-                        <MaterialIcons name="email" size={24} color="black" />
-                        <TextInput
-                            value={text.email} 
-                            placeholder="Your email" 
-                            style={styles.text_input} 
-                            autoCapitalize="none" 
-                            onChangeText={value => setText({...text, email:value})}
-                            onEndEditing={e => validEmail(e.nativeEvent.text)}
-                        />
-                    </View> 
-                    {(validation.email && already.alemail) && (
-                    <Animatable.View animation="fadeInLeft" duration={500}>
-                        <Text style={styles.error}>Invalid email</Text>
-                    </Animatable.View>
-                    )}    
-                    <Text style={[styles.text_footer, { marginTop:35 }]}>Password</Text>
-                    <View style={styles.action}>
-                        <FontAwesomeIcon icon={faLock} size={20} />
-                        <TextInput 
-                            value={text.password}
-                            placeholder="Your password" 
-                            style={styles.text_input} 
-                            autoCapitalize="none" 
-                            secureTextEntry={true}
-                            onChangeText={value => setText({...text, password:value})} 
-                            onEndEditing={e => validPass(e.nativeEvent.text)}
-                        />
-                    </View>
-                    {(validation.password && already.alpassword) && (
-                    <Animatable.View animation="fadeInLeft" duration={500}>
-                        <Text style={styles.error}>Invalid password</Text>
-                    </Animatable.View>
-                    )}    
-                    <Text style={[styles.text_footer, { marginTop:35 }]}>Re-Enter password</Text>
-                    <View style={styles.action}>
-                        <FontAwesomeIcon icon={faLock} size={20} />
-                        <TextInput 
-                            value={text.repassword}
-                            placeholder="Your password" 
-                            style={styles.text_input} 
-                            autoCapitalize="none" 
-                            secureTextEntry={true}
-                            onChangeText={value => setText({...text, repassword:value})} 
-                            onEndEditing={e => validRePass(e.nativeEvent.text)}
-                        />
-                    </View>
-                    {(validation.repassword && already.alrepassword) && (
-                    <Animatable.View animation="fadeInLeft" duration={500}>
-                        <Text style={styles.error}>Invalid Re-password</Text>
-                    </Animatable.View>
-                    )}
-
-                    
-                    <Text style={[styles.text_footer, { marginTop:35 }]}>Full name</Text>
-                    <View style={styles.action}>
-                        <FontAwesomeIcon icon={faUser} size={20} />
-                        <TextInput 
-                            value={text.fullname}
-                            placeholder="Your full name" 
-                            style={styles.text_input} 
-                            autoCapitalize="none" 
-                            onChangeText={value => setText({...text, fullname:value})} 
-                        />
-                    </View> 
-                    
-                    <Text style={[styles.text_footer, { marginTop:35 }]}>Phone</Text>
-                    <View style={styles.action}>
-                        <Entypo name="phone" size={24} color="black" />
-                        <TextInput 
-                            value={text.phone}
-                            placeholder="Your phone" 
-                            style={styles.text_input} 
-                            autoCapitalize="none" 
-                            onChangeText={value => setText({...text, phone:value})} 
-                            onEndEditing={e => validPhone(e.nativeEvent.text)}
-                        />
-                    </View>  
-                    {(validation.phone && already.alphone) && (
-                    <Animatable.View animation="fadeInLeft" duration={500}>
-                        <Text style={styles.error}>Invalid phone</Text>
-                    </Animatable.View>
-                    )}    
-                    <TouchableOpacity onPress={signup}>
-                        <View style={styles.button}>
-                            <LinearGradient
-                                colors={['white', '#00bfff']}
-                                style={styles.login}
-                            >
-                                <Text style={styles.login_text}>Sign up</Text>
-                            </LinearGradient>
+        <KeyboardAvoidingView style={{flex: 1}} behavior="padding">
+            <SafeAreaView style={styles.container}>
+                <StatusBar barStyle="dark-content" />
+                <View style={styles.header}>
+                    <Text style={styles.title}>Register</Text>
+                </View>
+                <Animatable.View style={styles.footer} animation='fadeInUpBig'>
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        
+                        <Text style={styles.text_footer}>Email</Text>
+                        <View style={styles.action}>
+                            <MaterialIcons name="email" size={24} color="black" />
+                            <TextInput
+                                value={text.email} 
+                                placeholder="Your email" 
+                                style={styles.text_input} 
+                                autoCapitalize="none" 
+                                onChangeText={value => setText({...text, email:value})}
+                                onEndEditing={e => validEmail(e.nativeEvent.text)}
+                            />
+                        </View> 
+                        {(validation.email && already.alemail) && (
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.error}>Invalid email</Text>
+                        </Animatable.View>
+                        )}    
+                        <Text style={[styles.text_footer, { marginTop:35 }]}>Password</Text>
+                        <View style={styles.action}>
+                            <FontAwesomeIcon icon={faLock} size={20} />
+                            <TextInput 
+                                value={text.password}
+                                placeholder="Your password" 
+                                style={styles.text_input} 
+                                autoCapitalize="none" 
+                                secureTextEntry={true}
+                                onChangeText={value => setText({...text, password:value})} 
+                                onEndEditing={e => validPass(e.nativeEvent.text)}
+                            />
                         </View>
-                    </TouchableOpacity> 
-                </ScrollView>
-            </Animatable.View>
-        </SafeAreaView>
+                        {(validation.password && already.alpassword) && (
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.error}>Invalid password</Text>
+                        </Animatable.View>
+                        )}    
+                        <Text style={[styles.text_footer, { marginTop:35 }]}>Re-Enter password</Text>
+                        <View style={styles.action}>
+                            <FontAwesomeIcon icon={faLock} size={20} />
+                            <TextInput 
+                                value={text.repassword}
+                                placeholder="Your password" 
+                                style={styles.text_input} 
+                                autoCapitalize="none" 
+                                secureTextEntry={true}
+                                onChangeText={value => setText({...text, repassword:value})} 
+                                onEndEditing={e => validRePass(e.nativeEvent.text)}
+                            />
+                        </View>
+                        {(validation.repassword && already.alrepassword) && (
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.error}>Invalid Re-password</Text>
+                        </Animatable.View>
+                        )}
+
+                        
+                        <Text style={[styles.text_footer, { marginTop:35 }]}>Full name</Text>
+                        <View style={styles.action}>
+                            <FontAwesomeIcon icon={faUser} size={20} />
+                            <TextInput 
+                                value={text.fullname}
+                                placeholder="Your full name" 
+                                style={styles.text_input} 
+                                autoCapitalize="none" 
+                                onChangeText={value => setText({...text, fullname:value})} 
+                            />
+                        </View> 
+                        
+                        <Text style={[styles.text_footer, { marginTop:35 }]}>Phone</Text>
+                        <View style={styles.action}>
+                            <Entypo name="phone" size={24} color="black" />
+                            <TextInput 
+                                value={text.phone}
+                                placeholder="Your phone" 
+                                style={styles.text_input} 
+                                autoCapitalize="none" 
+                                onChangeText={value => setText({...text, phone:value})} 
+                                onEndEditing={e => validPhone(e.nativeEvent.text)}
+                            />
+                        </View>  
+                        {(validation.phone && already.alphone) && (
+                        <Animatable.View animation="fadeInLeft" duration={500}>
+                            <Text style={styles.error}>Invalid phone</Text>
+                        </Animatable.View>
+                        )}    
+                        <TouchableOpacity onPress={signup}>
+                            <View style={styles.button}>
+                                <LinearGradient
+                                    colors={['white', '#00bfff']}
+                                    style={styles.login}
+                                >
+                                    <Text style={styles.login_text}>Sign up</Text>
+                                </LinearGradient>
+                            </View>
+                        </TouchableOpacity> 
+                    </ScrollView>
+                </Animatable.View>
+            </SafeAreaView>
+        </KeyboardAvoidingView>
     )
 }
 

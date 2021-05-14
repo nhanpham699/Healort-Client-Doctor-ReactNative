@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FlatList, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons'; 
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 
 
 const DATA = [
@@ -52,6 +53,8 @@ const Item = ({ item, onPress, style }) => (
 );
 
 const Flatlist = ({}) => {
+
+  const { user } = useSelector(state => state.users)
   const navigation = useNavigation()
   const [selectedId, setSelectedId] = useState(null);
 
@@ -60,7 +63,9 @@ const Flatlist = ({}) => {
 
   const menuPress = (id) => {
     switch(id) {
-        case '1':  return navigation.navigate('MakeaApp')
+        case '1': if(!user.avatar || !user.gender || !user.fullname || !user.phone || !user.email || !user.date || !user.address ){
+                      return alert("Please complete your profile to make an appointment!")
+                  }else return navigation.navigate('MakeaApp')
         case '2':  return navigation.navigate('Schedule')
         case '3':  return navigation.navigate('Doctor')
         case '4':  return navigation.navigate('Message')

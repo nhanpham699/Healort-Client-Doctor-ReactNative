@@ -5,10 +5,10 @@ import {
     Text,
     StyleSheet,
     StatusBar, 
-    Dimensions,
     TouchableOpacity,
     TextInput,
-    AsyncStorage
+    AsyncStorage,
+    KeyboardAvoidingView
 } from 'react-native'
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
@@ -126,52 +126,54 @@ export default function DoctorLogin({navigation}){
     
 
     return(
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" />
-            <View style={styles.header}>
-                <Text style={styles.title}>Welcome!</Text>
-            </View>
-            <Animatable.View style={styles.footer} animation='fadeInUpBig'>
-                <Text style={styles.text_footer}>Email</Text>
-                <View style={styles.action}>
-                    <FontAwesomeIcon icon={faUser} size={20} />
-                    <TextInput
-                        value={text.email} 
-                        placeholder="Your email" 
-                        style={styles.text_input} 
-                        autoCapitalize="none" 
-                        onChangeText={value => setText({...text, email:value})}
-                    />
-                </View> 
-                <Text style={[styles.text_footer, { marginTop:35 }]}>Password</Text>
-                <View style={styles.action}>
-                    <FontAwesomeIcon icon={faLock} size={20} />
-                    <TextInput 
-                        value={text.password}
-                        placeholder="Your password" 
-                        style={styles.text_input} 
-                        autoCapitalize="none" 
-                        secureTextEntry={secureText}
-                        onChangeText={value => setText({...text, password:value})} 
-                    />
-                    <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                        {secureText ? <EyeOff color="gray" size={20} />
-                                    : <Eye color="green" size={20} />}
-                    </TouchableOpacity>
-                </View> 
-                <TouchableOpacity onPress={login}>
-                    <View style={styles.button}>
-                        <LinearGradient
-                            colors={['#44A08D', '#237A57']}
-                            style={styles.login}
-                        >
-                            <Text style={styles.login_text}>Log in</Text>
-                        </LinearGradient>
-                    </View>
-                </TouchableOpacity>  
+        <KeyboardAvoidingView style={{flex: 1}} behavior="padding">
+            <SafeAreaView style={styles.container}>
+                <StatusBar barStyle="dark-content" />
+                <View style={styles.header}>
+                    <Text style={styles.title}>Welcome!</Text>
+                </View>
+                <Animatable.View style={styles.footer} animation='fadeInUpBig'>
+                    <Text style={styles.text_footer}>Email</Text>
+                    <View style={styles.action}>
+                        <FontAwesomeIcon icon={faUser} size={20} />
+                        <TextInput
+                            value={text.email} 
+                            placeholder="Your email" 
+                            style={styles.text_input} 
+                            autoCapitalize="none" 
+                            onChangeText={value => setText({...text, email:value})}
+                        />
+                    </View> 
+                    <Text style={[styles.text_footer, { marginTop:35 }]}>Password</Text>
+                    <View style={styles.action}>
+                        <FontAwesomeIcon icon={faLock} size={20} />
+                        <TextInput 
+                            value={text.password}
+                            placeholder="Your password" 
+                            style={styles.text_input} 
+                            autoCapitalize="none" 
+                            secureTextEntry={secureText}
+                            onChangeText={value => setText({...text, password:value})} 
+                        />
+                        <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                            {secureText ? <EyeOff color="gray" size={20} />
+                                        : <Eye color="green" size={20} />}
+                        </TouchableOpacity>
+                    </View> 
+                    <TouchableOpacity onPress={login}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#44A08D', '#237A57']}
+                                style={styles.login}
+                            >
+                                <Text style={styles.login_text}>Log in</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>  
 
-            </Animatable.View>
-        </SafeAreaView>
+                </Animatable.View>
+            </SafeAreaView>
+        </KeyboardAvoidingView>
     )
 }
 

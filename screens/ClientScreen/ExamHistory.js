@@ -63,7 +63,7 @@ const ExamHistory = ({navigation}) => {
         </View>
         <ScrollView style={{backgroundColor: 'white', flex: 1, marginTop: 20}}>
           <List.Section>
-            {data.map((sch) => (
+            {data.length ? data.map((sch) => (
               <List.Accordion
                 key={sch._id}
                 title={(new Date(sch.date)).toString().slice(0,15)}
@@ -112,7 +112,9 @@ const ExamHistory = ({navigation}) => {
                 setModal={handleReview} /> 
                 }
               </List.Accordion>
-            ))}
+            )) : <View style={{marginTop: '50%', alignItems: 'center'}}>
+                    <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
+                 </View> }
           </List.Section>
         </ScrollView>
     </View>

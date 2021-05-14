@@ -90,7 +90,7 @@ export default PresctiptionModal = (props,{navigation}) => {
  
   const hanldeConfirm = async() => {
     if(pres.total){
-        await axios.post(host + '/medicines/addpres', pres)
+        await axios.post(host + '/prescriptions/addpres', pres)
         .then(() => {
           Alert.alert(
             "Create the prescription",

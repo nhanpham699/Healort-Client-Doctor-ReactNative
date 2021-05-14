@@ -24,7 +24,7 @@ const Prescription = ({navigation}) => {
   const { user } = useSelector(state => state.users)  
 
   const getData = async () => {
-      const res = await axios.get(host + "/medicines/getallpres/" + user.id)
+      const res = await axios.get(host + "/prescriptions/getallpres/" + user.id)
       setPres(res.data)
       console.log(res.data);  
   }  
@@ -43,7 +43,7 @@ const Prescription = ({navigation}) => {
         </View>
         <ScrollView style={{backgroundColor: 'white', flex: 1, marginTop: 20}}>
           <List.Section>
-            {pres.map(pr => (
+            {pres.length ? pres.map(pr => (
             <List.Accordion
                 key={pr._id}
                 title={(new Date(pr.date)).toString().slice(0,15)}
@@ -63,7 +63,9 @@ const Prescription = ({navigation}) => {
                 <List.Item title={'Total: ' + pr.total + '$'} />
                 <List.Item title={'Note: ' + pr.note} />               
             </List.Accordion>
-            ))}    
+            )) : <View style={{marginTop: '50%', alignItems: 'center'}}>
+                    <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
+                 </View>}    
           </List.Section>
         </ScrollView>
     </View>

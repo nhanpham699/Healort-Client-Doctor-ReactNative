@@ -219,7 +219,7 @@ const Schedule = ({navigation}) => {
           </View>
           {!component ?
           <List.Section>
-            {data.map((sch) => (
+            {data.length ? data.map((sch) => (
               <List.Accordion
                 key={sch._id}
                 title={(new Date(sch.date)).toString().slice(0,15)}
@@ -265,11 +265,13 @@ const Schedule = ({navigation}) => {
                 </View> 
                 
               </List.Accordion>
-            ))}
+            )) : <View style={{marginTop: '50%', alignItems: 'center'}}>
+                    <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
+                 </View>}
           </List.Section>
           :
           <List.Section>
-            {reexamData.map(sch => (
+            {reexamData.length ? reexamData.map(sch => (
               <List.Accordion
                 key={sch._id}
                 title={(new Date(sch.date)).toString().slice(0,15)}
@@ -302,7 +304,9 @@ const Schedule = ({navigation}) => {
                   </TouchableOpacity> 
                 </View> 
               </List.Accordion>
-            ))}
+            )): <View style={{marginTop: '50%', alignItems: 'center'}}>
+                    <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
+                 </View>}
           </List.Section>
           }
         </ScrollView>
