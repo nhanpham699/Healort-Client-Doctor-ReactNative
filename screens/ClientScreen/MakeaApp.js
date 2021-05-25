@@ -88,6 +88,8 @@ export default function MakeaApp({navigation, route}) {
         third : false
     })
 
+    const [checked, setChecked] = useState([])
+    const [service, setService] = useState([])
     const [dateArr, setDateArr] = useState(DATE_DATA)
     const [hourArr, setHourArr] = useState(HOUR_DATA)
     const [schedules, setSchedules] = useState([])
@@ -230,11 +232,7 @@ export default function MakeaApp({navigation, route}) {
         }       
         setDateArr(arr)
         setHourArr(HOUR_DATA)
-        setIsChecked({
-            first: false,
-            second: false,
-            third: false
-        })
+        setChecked([])
         setData({...data, date: null, begin: 0, services: [], doctorId: value})
         setSelectedDateId(null)
         setSelectedHourId(null)
@@ -244,11 +242,8 @@ export default function MakeaApp({navigation, route}) {
 
     const getDate = (item) => {
         setHourArr(HOUR_DATA)
-        setIsChecked({
-            first: false,
-            second: false,
-            third: false
-        })
+        setChecked([])
+
         if(!data.doctorId){
             alert("please choose a doctor!")
         }else{
@@ -291,17 +286,19 @@ export default function MakeaApp({navigation, route}) {
 
     // Hour
     const getHour = (item) => {
-        setIsChecked({
-            first: false,
-            second: false,
-            third: false
-        })
+        setChecked([])
+
         if(!data.date){
             alert("you haven't chosen a date yet!")
         }else{
             setData({...data, begin : item.value, services: []})
             setSelectedHourId(item.id)             
         }
+    }
+
+    const getAllServices = async() => {
+        const res = await axios.get(host + '/services/getallservices')
+        setService(res.data)
     }
 
     useEffect(() => {
@@ -314,16 +311,16 @@ export default function MakeaApp({navigation, route}) {
         .then(res => {
             setReexams(res.data)
         })  
-
+        getAllServices()
         getAllAbsences()    
     },[])
 
     const make = async() => {
         
-        if(!data.date || !data.doctorId || !data.begin || !data.services.length || !data.note){
+        if(!data.date || !data.doctorId || !data.begin || !checked.length || !data.note){
             alert("Make an appointment failed!!")
         }else{
-            const dataFilter = {...data, date: data.date.toString().slice(0,15)}
+            const dataFilter = {...data, date: data.date.toString().slice(0,15), services: checked}
             navigation.navigate('Checkout', {data: dataFilter})                                                                
         }
         
@@ -376,52 +373,26 @@ export default function MakeaApp({navigation, route}) {
                     <View style={styles.footer}>
                         <Text style={styles.choose}>Choose services</Text>  
                         <View style={styles.checkboxs}>
-                            <CheckBox
-                                onClick={()=>{
-                                    if(data.begin){
-                                        const index = data.services.indexOf(0)
-                                        if(index >= 0){
-                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                                        }else{  
-                                            setData({...data, services: [...data.services, 0]})
-                                        }
-                                        setIsChecked({...isChecked, first : !isChecked.first})
-                                    }else alert("choose time please!")
-                                }}
-                                isChecked={isChecked.first}
+                            {service.map((ser,num) => (
+                                <CheckBox
+                                    onClick={()=>{
+                                        if(data.begin){
+                                        const currentIndex = checked.indexOf(num)
+                                        const newChecked = [...checked]
 
-                                leftText={"Tooth extraction (100$)"}
-                            />
-                            <CheckBox
-                                onClick ={()=>{
-                                    if(data.begin){
-                                        const index = data.services.indexOf(1)
-                                        if(index >= 0) {
-                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                                        }else{
-                                            setData({...data, services: [...data.services, 1]})
+                                        if(currentIndex === -1){
+                                            newChecked.push(num)
+                                        }else {
+                                            newChecked.splice(currentIndex, 1)
                                         }
-                                        setIsChecked({...isChecked, second : !isChecked.second})
-                                    }else alert("choose time please!")
-                                }}
-                                isChecked={isChecked.second}
-                                leftText={"Fillings (50$)"}
-                            />
-                            <CheckBox
-                                onClick={()=>{
-                                    if(data.begin){
-                                        const index = data.services.indexOf(2)
-                                        if(index >= 0){ 
-                                            setData({...data, services: [...data.services.slice(0,index), ...data.services.slice(index+1)]})
-                                        }else{
-                                            setData({...data, services: [...data.services, 2]})
-                                        }
-                                        setIsChecked({...isChecked, third : !isChecked.third})
-                                    }else alert("choose time please!")
-                                }}
-                                isChecked={isChecked.third}
-                                leftText={"Dental implants (500$)"}
-                            />
+                                        console.log(newChecked, num, currentIndex)
+                                        setChecked(newChecked)
+                                        }else alert("choose time please!")
+                                    }}
+                                    isChecked={ (checked.indexOf(num) != -1) ? true : false}
+                                    leftText={ser.name + ' ' + '(' + ser.price + ')'}
+                                />
+                            ))}
                         </View>  
                         <View>
                             <Text style={styles.choose}>Note</Text>

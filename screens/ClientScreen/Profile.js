@@ -22,7 +22,7 @@ import host from '../../host';
 import {addUser} from '../../actions/user'
 import {useDispatch} from 'react-redux'
 import { ModalDatePicker } from "react-native-material-date-picker";
-
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 export default function Profile({navigation}) {
 
@@ -63,7 +63,20 @@ export default function Profile({navigation}) {
         avatar: user.avatar
     })
     
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+
+    const handleConfirm = (date) => {
+        setDataUpdate({...dataUpdate, date: date})
+        hideDatePicker();
+    };
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -263,17 +276,22 @@ export default function Profile({navigation}) {
 
                     <View style={{position: 'absolute', right: 12, top: 60, zIndex: 10}}>
                         {edit &&
-                        <ModalDatePicker 
-                            button={<FontAwesome name="calendar" size={20} color="black" />} 
-                            locale="tr" 
-                            onSelect={value => setDataUpdate({...dataUpdate, date: value})}
-                            isHideOnSelect={true}
-                            language={require('../../locales/en.json')}
-                            initialDate={new Date()}
-                        /> }
+                            <View>
+                                <TouchableOpacity  onPress={showDatePicker}>
+                                    <FontAwesome name="calendar" size={20} color="black" />
+                                </TouchableOpacity>
+                                <DateTimePickerModal
+                                    isVisible={isDatePickerVisible}
+                                    mode="date"
+                                    onConfirm={handleConfirm}
+                                    onCancel={hideDatePicker}
+                                />
+                            </View> }
                     </View>
                     <TextInput 
-                        value={dataUpdate.date ? dataUpdate.date.toString().slice(0,10) : ''}
+                        value={dataUpdate.date ? (new Date(dataUpdate.date)).getDate() + '-' +
+                         ((new Date(dataUpdate.date)).getMonth()+1) + '-' +
+                         (new Date(dataUpdate.date)).getFullYear() : ''}
                         editable={false}
                         placeholder="Your date birth" 
                         style={styles.text_input} 

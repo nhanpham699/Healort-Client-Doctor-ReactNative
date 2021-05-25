@@ -49,9 +49,9 @@ export default PresctiptionModal = (props,{navigation}) => {
       const res = await axios.get(host + '/medicines/getmedicinebyid/' + value)
       const { price, name }  = res.data
       const arr = [...pres.medicine]
-      arr[index].value = value;
-      arr[index].price = price;
-      arr[index].name = name
+      arr[index].value = value
+      arr[index].price = price
+      arr[index].name = name 
       const total = calculateTotal(arr, pres.times)
       setPres({...pres, medicine: arr, total: total})
   }
@@ -99,8 +99,9 @@ export default PresctiptionModal = (props,{navigation}) => {
               { text: "OK", onPress: async() => {
                   setModal()
                   await axios.post(host + '/schedules/updatePrescription',{id: pres.scheduleId})
-                  .then(() => {
-                      getData()
+                  .then(async() => {
+                      await axios.post(host + '/medicines/purchase', {medicine: pres.medicine, times: pres.times})
+                      await getData()
                   })
               } }
             ]

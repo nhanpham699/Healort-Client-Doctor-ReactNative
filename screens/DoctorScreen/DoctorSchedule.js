@@ -15,7 +15,7 @@ import host from '../../host'
 import { List } from 'react-native-paper';
 import axios from 'axios';
 import {useSelector} from 'react-redux'
-import ReviewModal from '../../components/ReviewModal'
+// import ReviewModal from '../../components/ReviewModal'
 import PrescriptionModal from '../../components/PrescriptionModal'
 
 const DoctorSchedule = ({navigation}) => {
@@ -37,9 +37,31 @@ const DoctorSchedule = ({navigation}) => {
       })
   }
 
+  const handleSuccess = async(id) => {
+    await axios.post(host + "/schedules/success", {id: id})
+    .then(() => {
+        getSchedules()
+    })
+  }
+
+  const handleNoReply = async(id) => {
+    await axios.post(host + "/schedules/noreply", {id: id})
+    .then(() => {
+        getSchedules()
+    })
+  }
+
+  const handleNotCome = async(id) => {
+    await axios.post(host + "/schedules/notcome", {id: id})
+    .then(() => {
+        getSchedules()
+    })
+  }
+
   const getSchedules = async() => {
       const res = await axios.get(host + '/schedules/getallbydoctor/' + doctor.id)
-      setData(res.data)
+      const newData = res.data.filter(dt => dt.status != 2 && dt.status != 3)
+      setData(newData)
   }
 
   useEffect(() => {
@@ -59,7 +81,7 @@ const DoctorSchedule = ({navigation}) => {
             {data.length ? data.map((sch) => (
               <List.Accordion
                 key={sch._id}
-                title={(new Date(sch.date)).toString().slice(0,15)}
+                title={(new Date(sch.date)).getDate() + "-" + ((new Date(sch.date)).getMonth()+1) + "-" + (new Date(sch.date)).getFullYear()}
                 left={props => <List.Icon {...props} icon="calendar-today" />}
                 >
                 <List.Item style={{marginTop: -10}} title={'Time: ' + sch.begin + ':00'} />
@@ -77,7 +99,19 @@ const DoctorSchedule = ({navigation}) => {
                 {sch.status 
                 ? 
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                    {!sch.reexam &&
+                    {sch.status !=3 && 
+                        <TouchableOpacity onPress={() => handleSuccess(sch._id)}>
+                            <View style={styles.button}>
+                                <LinearGradient
+                                    colors={['#76b852','#8DC26F']}
+                                    style={styles.update}
+                                >
+                                    <Text style={styles.update_text}>Success</Text>
+                                </LinearGradient>
+                            </View>
+                        </TouchableOpacity>
+                    }
+                    {!sch.reexam && sch.status !=3 &&
                     <TouchableOpacity onPress={() => navigation.navigate('ReExam', {doctor : sch.doctorId, userId: sch.userId._id ,scheduleId: sch._id})}>
                         <View style={styles.button}>
                             <LinearGradient
@@ -89,7 +123,7 @@ const DoctorSchedule = ({navigation}) => {
                         </View>
                     </TouchableOpacity>
                     }
-                    {!sch.prescription &&  
+                    {!sch.prescription && sch.status !=3 &&  
                     <TouchableOpacity onPress={handlePrescription}>
                         <View style={styles.button}>
                             <LinearGradient
@@ -105,13 +139,25 @@ const DoctorSchedule = ({navigation}) => {
                 :    
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
                   {(!sch.confirmation ? sch.confirmation : sch.confirmation.date )?
-                      <View style={styles.button}>
-                          <LinearGradient
-                              colors={['#F3F9A7','#CAC531']}
-                              style={[styles.update, {width: 200}]}
-                          >
-                              <Text style={styles.update_text}>Waiting for confirmation</Text>
-                          </LinearGradient>
+                      <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#F3F9A7','#CAC531']}
+                                style={[styles.update, {width: 200}]}
+                            >
+                                <Text style={styles.update_text}>Waiting for confirmation</Text>
+                            </LinearGradient>
+                        </View>
+                        <TouchableOpacity onPress={() => handleNoReply(sch._id)}>
+                            <View style={styles.button}>
+                                <LinearGradient
+                                    colors={['#D4919E','#C13815']}
+                                    style={styles.update}
+                                >
+                                    <Text style={styles.update_text}>No reply</Text>
+                                </LinearGradient>
+                            </View>
+                        </TouchableOpacity>
                       </View>
                   :
                   <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
@@ -128,13 +174,23 @@ const DoctorSchedule = ({navigation}) => {
                     <TouchableOpacity onPress={() => handleExamed(sch._id)}>
                         <View style={styles.button}>
                             <LinearGradient
-                                colors={['#D4919E','#C13815']}
+                                colors={['#76b852','#8DC26F']}
                                 style={styles.update}
                             >
                                 <Text style={styles.update_text}>Examed</Text>
                             </LinearGradient>
                         </View>
-                    </TouchableOpacity> 
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleNotCome(sch._id)}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#D4919E','#C13815']}
+                                style={[styles.update, {width: 100}]}
+                            >
+                                <Text style={styles.update_text}>No comming</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>  
                   </View>
                   } 
                 </View> 

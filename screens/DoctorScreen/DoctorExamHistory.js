@@ -35,7 +35,7 @@ const ExamHistory = ({navigation}) => {
 
   const getAllSchedules = async() => {
     const res = await axios.get(host + '/schedules/getallbydoctor/' + doctor.id)
-    const newData = res.data.filter(dt => dt.status === 1)
+    const newData = res.data.filter(dt => dt.status === 3)
     setData(newData)
   }
 

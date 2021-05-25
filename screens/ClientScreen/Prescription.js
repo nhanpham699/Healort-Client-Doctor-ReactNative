@@ -46,11 +46,20 @@ const Prescription = ({navigation}) => {
             {pres.length ? pres.map(pr => (
             <List.Accordion
                 key={pr._id}
-                title={(new Date(pr.date)).toString().slice(0,15)}
+                title={
+                  (new Date(pr.date)).getDate() + "-" 
+                  + ((new Date(pr.date)).getMonth()+1) + "-" 
+                  + (new Date(pr.date)).getFullYear()}
                 left={props => <List.Icon {...props} icon="calendar-today" />}
                 >
                 <List.Item title={'Doctor: ' + pr.doctorId.fullname} />
-                <List.Item title={'Schedule: ' + (new Date(pr.scheduleId.date)).toString().slice(0,15)} />  
+                <List.Item 
+                title={'Schedule: ' 
+                + (new Date(pr.scheduleId.date)).getDate() 
+                + "-" 
+                + ((new Date(pr.scheduleId.date)).getMonth()+1) 
+                + "-" + (new Date(pr.scheduleId.date)).getFullYear()}
+                />  
                 <View style={{flexDirection: 'row', marginBottom: 15}}>
                   <Text style={{fontSize: 16, marginLeft: 7, marginTop: 14}}>Medicines: </Text>
                     {pr.medicine.map((me,index) => (

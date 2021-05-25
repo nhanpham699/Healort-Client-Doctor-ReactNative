@@ -41,13 +41,13 @@ export default function Bar({navigation}){
                 <ImageBackground source={require('../../assets/bgbottom.png')} style={styles.header}>
                 <ScrollView>
                     <View style={styles.menubar}>
-                        <Text style={styles.menutext}>Profile</Text>
-                    </View>
-                    <View style={styles.menubar}>
                         <Text style={styles.menutext}>Introducion</Text>
                     </View>
                     <View style={styles.menubar}>
-                        <Text style={styles.menutext}>Terms</Text>
+                        <Text style={styles.menutext}>Tutorial</Text>
+                    </View>
+                    <View style={styles.menubar}>
+                        <Text style={styles.menutext}>Terms & Subscription</Text>
                     </View>
                     <View style={styles.menubar}>
                         <TouchableOpacity onPress={logout}>

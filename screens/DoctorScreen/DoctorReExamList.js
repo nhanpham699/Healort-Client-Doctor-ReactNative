@@ -37,6 +37,27 @@ export default function ReExam({navigation}) {
       })
   }
 
+  const handleSuccess = async(id) => {
+    await axios.post(host + "/reexams/success", {id: id})
+    .then(() => {
+        getAllSchedules()
+    })
+  }
+
+  const handleNoReply = async(id) => {
+    await axios.post(host + "/reexams/noreply", {id: id})
+    .then(() => {
+        getAllSchedules()
+    })
+  }
+
+  const handleNotCome = async(id) => {
+    await axios.post(host + "/reexams/notcome", {id: id})
+    .then(() => {
+        getAllSchedules()
+    })
+  }
+
   const handleReExam = async(sch) => {
       navigation.navigate("ReExam", {
         doctor: sch.doctorId,
@@ -48,8 +69,8 @@ export default function ReExam({navigation}) {
 
   const getAllSchedules = async() => {
     const res = await axios.get(host + '/reexams/getallreexamsbydoctor/' + doctor.id)
-    // const newData = res.data.filter(dt => dt.status == 0)
-    setData(res.data)
+    const newData = res.data.filter(dt => dt.status != 3)
+    setData(newData)
   }
 
   useEffect(() => {
@@ -70,22 +91,34 @@ export default function ReExam({navigation}) {
             {data.length ? data.map(sch => (
               <List.Accordion
                 key={sch._id}
-                title={(new Date(sch.date)).toString().slice(0,15)}
+                title={(new Date(sch.date)).getDate() + "-" + ((new Date(sch.date)).getMonth()+1) + "-" + (new Date(sch.date)).getFullYear()}
                 left={props => <List.Icon {...props} icon="calendar-today" />}
                 >
                 <List.Item style={{marginTop: -10}} title={'Time: ' + sch.begin + ':00'} />
                 <List.Item title={'User name: ' + sch.userId.fullname} />
-                <List.Item title={'Old schedule: ' + (new Date(sch.scheduleId.date)).toString().slice(0,15)} />  
+                <List.Item title={'Old schedule: ' + (new Date(sch.scheduleId.date)).getDate() + "-" + ((new Date(sch.scheduleId.date)).getMonth()+1) + "-" + (new Date(sch.scheduleId.date)).getFullYear()}/>  
 
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
                   {(!sch.confirmation ? sch.confirmation : sch.confirmation.date )?
-                      <View style={styles.button}>
-                          <LinearGradient
-                              colors={['#F3F9A7','#CAC531']}
-                              style={[styles.update, {width: 200}]}
-                          >
-                              <Text style={styles.update_text}>Waiting for confirmation</Text>
-                          </LinearGradient>
+                    <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#F3F9A7','#CAC531']}
+                                style={[styles.update, {width: 200}]}
+                            >
+                                <Text style={styles.update_text}>Waiting for confirmation</Text>
+                            </LinearGradient>
+                        </View>
+                        <TouchableOpacity onPress={() => handleNoReply(sch._id)}>
+                            <View style={styles.button}>
+                                <LinearGradient
+                                    colors={['#D4919E','#C13815']}
+                                    style={styles.update}
+                                >
+                                    <Text style={styles.update_text}>No reply</Text>
+                                </LinearGradient>
+                            </View>
+                        </TouchableOpacity>
                       </View>
                   :
                   <TouchableOpacity onPress={() => handleUpdate(sch._id, sch.userId, sch.doctorId.fullname, sch.doctorId._id)}>
@@ -100,28 +133,52 @@ export default function ReExam({navigation}) {
                   </TouchableOpacity>   
                   }  
                   {!sch.status ?
-                  <TouchableOpacity onPress={() => handleExamed(sch._id)}>
-                      <View style={styles.button}>
-                          <LinearGradient
-                              colors={['#D4919E','#C13815']}
-                              style={styles.update}
-                          >
-                              <Text style={styles.update_text}>Examed</Text>
-                          </LinearGradient>
-                      </View>
-                  </TouchableOpacity>
+                    <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        <TouchableOpacity onPress={() => handleExamed(sch._id)}>
+                            <View style={styles.button}>
+                                <LinearGradient
+                                    colors={['#76b852','#8DC26F']}
+                                    style={styles.update}
+                                >
+                                    <Text style={styles.update_text}>Examed</Text>
+                                </LinearGradient>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleNotCome(sch._id)}>
+                            <View style={styles.button}>
+                                <LinearGradient
+                                    colors={['#D4919E','#C13815']}
+                                    style={[styles.update, {width: 100}]}
+                                >
+                                    <Text style={styles.update_text}>No comming</Text>
+                                </LinearGradient>
+                            </View>
+                        </TouchableOpacity>  
+                    </View>
                   :
-                  <TouchableOpacity onPress={() => handleReExam(sch)}>
-                      <View style={styles.button}>
-                          <LinearGradient
-                              colors={['#CECCF5','#0970BE']}
-                              style={styles.update}
-                          >
-                              <Text style={styles.update_text}>re-exam {sch.times + 1}</Text>
-                          </LinearGradient>
-                      </View>
-                  </TouchableOpacity>
-                    }
+                  <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                    <TouchableOpacity onPress={() => handleReExam(sch)}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#CECCF5','#0970BE']}
+                                style={styles.update}
+                            >
+                                <Text style={styles.update_text}>re-exam {sch.times + 1}</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleSuccess(sch._id)}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#76b852','#8DC26F']}
+                                style={styles.update}
+                            >
+                                <Text style={styles.update_text}>Success</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>
+                  </View>
+                }
                 </View> 
               </List.Accordion>
             ))  : <View style={{marginTop: '50%', alignItems: 'center'}}>

@@ -291,7 +291,7 @@ export default function UpdateSchedules({navigation,route}) {
                                 doctorId: doctorId,
                                 scheduleId: id,
                                 title: 'Update the schedule',
-                                body: 'Doctor' + doctorName + ' want to update your schedule!',
+                                body: 'Doctor ' + doctorName + ' want to update your schedule!',
                                 status : 0,
                                 date: new Date()
                             }

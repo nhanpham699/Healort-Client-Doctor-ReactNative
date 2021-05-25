@@ -66,7 +66,7 @@ const ExamHistory = ({navigation}) => {
             {data.length ? data.map((sch) => (
               <List.Accordion
                 key={sch._id}
-                title={(new Date(sch.date)).toString().slice(0,15)}
+                title={(new Date(sch.date)).getDate() + "-" + ((new Date(sch.date)).getMonth()+1) + "-" + (new Date(sch.date)).getFullYear()}
                 left={props => <List.Icon {...props} icon="calendar-today" />}
                 >
                 <List.Item style={{marginTop: -10}} title={'Time: ' + sch.begin + ':00'} />
