@@ -36,7 +36,6 @@ export default function Profile({navigation}) {
     const [province, setProvince] = useState([])
     const [district, setDistrict] = useState([])
     const [commune, setCommune] = useState([])
-
     
     
 
@@ -62,7 +61,6 @@ export default function Profile({navigation}) {
         },
         avatar: user.avatar
     })
-    
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
     const showDatePicker = () => {
@@ -104,81 +102,88 @@ export default function Profile({navigation}) {
             }
           }
         })();
+        
+        getProvince()
 
-        axios.get('https://thongtindoanhnghiep.co/api/city')
-        .then(res => {
-            let data = res.data.LtsItem
-            data = data.map(dt => {
-                return { 
-                    'id': dt.ID,
-                    'label' : dt.Title, 
-                    'value' : dt.Title 
-                }
-            })
-            data.pop()
-            setProvince(data)
-        })
     }, []);
-   
+    
+    const getProvince = async () => {
+        const res = await axios.get('https://raw.githubusercontent.com/nghianguyen28799/plantweb/master/plant-web/src/dataAddress.json?fbclid=IwAR3x2sgDKty8DZ3DbhFjzNLi2RtrLIwxCJVhTWLqTYjcLrnGuL6CR-UfXAU')
+        const data = res.data.map(dt => {
+            return {
+                id: dt.id,
+                label: dt.name,
+                value: dt.name,
+                dist: dt.huyen
+            }
+        })
+        const prov = data.filter(dt => dt != null)
+        setProvince(prov)
+    }
 
     const changeCity = (val) => {
-        console.log(typeof(dataUpdate.date) + ' in changecity');
-        const provinceNow = province.filter(pro => { return pro.value == val })
-        if(provinceNow.length){
-            
-            axios.get('https://thongtindoanhnghiep.co/api/city/' + provinceNow[0].id + '/district')
-            .then(res => {
-                let data = res.data.map(dt => {
-                    return { 
-                        'id': dt.ID,
-                        'label' : dt.Title, 
-                        'value' : dt.Title 
-                    }
-                })
-                setDistrict(data)
-                setDataUpdate({
-                    ...dataUpdate,
-                    address: {
-                        ...dataUpdate.address,
-                        city: val
-                    }
-                })
+        if(val){
+            const data = province.filter(dt => dt.value === val)
+            // console.log(data);
+            const newData = data[0].dist
+            const dist = newData.map(dt => {
+                return {
+                    id: dt.id,
+                    label: dt.name,
+                    value: dt.name,
+                    ward: dt.xa
+                }
             })
-
+            // console.log(dist);
+            setDistrict(dist)
+            setDataUpdate({
+                ...dataUpdate,
+                address: {
+                    ...dataUpdate.address,
+                    city: data[0].label
+                }
+            })
             refDistrict.current.state.selectedItem = {label: 'Select an item...', value: null, color: "gray"}
             refCommue.current.state.selectedItem = {label: 'Select an item...', value: null, color: "gray"}
-        }        
+        }  
     }   
 
     const changeDistrict = (val) => {
-        
-        const districtNow = district.filter(dis => { return dis.value == val })
-
-        if(districtNow.length){
-            
-            axios.get('https://thongtindoanhnghiep.co/api/district/' + districtNow[0].id + '/ward')
-            .then(res => {
-                let data = res.data.map(dt => {
-                    return { 
-                        'id': dt.ID,
-                        'label' : dt.Title, 
-                        'value' : dt.Title 
-                    }
-                })
-                // console.log(data);
-                setCommune(data)
-                setDataUpdate({
-                    ...dataUpdate,
-                    address: {
-                        ...dataUpdate.address,
-                        district: val
-                    }
-                })
+        if(val){
+            const data = district.filter(dt => dt.value === val)
+            const newData = data[0].ward
+            const ward = newData.map(dt => {
+                return {
+                    id: dt.id,
+                    label: dt.name,
+                    value: dt.name,
+                }
             })
-
+            // console.log(dist);
+            setCommune(ward)
+            setDataUpdate({
+                ...dataUpdate,
+                address: {
+                    ...dataUpdate.address,
+                    district: data[0].label
+                }
+            })
             refCommue.current.state.selectedItem = {label: 'Select an item...', value: null, color: "gray"}
         }
     } 
+
+    const changeCommue = (val) => {
+        if(val){
+            const data = commune.filter(dt => dt.value === val)
+            setDataUpdate({
+                ...dataUpdate,
+                address: {
+                    ...dataUpdate.address,
+                    ward: data[0].label
+                }
+            })
+        }
+    }
 
     const hanldeEdit = () => {
         setEdit(!edit)
@@ -344,7 +349,7 @@ export default function Profile({navigation}) {
                         />
                         :
                         <RNPickerSelect
-                            disabled={edit ? false : true}
+                            disabled={true}
                             value={user.address.city}
                             onValueChange={val => changeCity(val)}
                             items={province} 
@@ -380,10 +385,7 @@ export default function Profile({navigation}) {
                         {edit ?    
                         <RNPickerSelect
                             ref={refCommue}
-                            onValueChange={value => setDataUpdate({...dataUpdate, address: {
-                                ...dataUpdate.address,
-                                ward: value
-                            }})}
+                            onValueChange={val => changeCommue(val)}
                             items={commune}
                             style={pickerSelectStyles} 
                         /> 
@@ -391,10 +393,7 @@ export default function Profile({navigation}) {
                         <RNPickerSelect
                             value={user.address.ward}
                             ref={refCommue}
-                            onValueChange={value => setDataUpdate({...dataUpdate, address: {
-                                ...dataUpdate.address,
-                                ward: value
-                            }})}
+                            onValueChange={val => changeCommue(val)}
                             items={commune}
                             style={pickerSelectStyles}
                             disabled={edit ? false : true}

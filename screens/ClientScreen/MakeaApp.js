@@ -375,6 +375,7 @@ export default function MakeaApp({navigation, route}) {
                         <View style={styles.checkboxs}>
                             {service.map((ser,num) => (
                                 <CheckBox
+                                    key={num}
                                     onClick={()=>{
                                         if(data.begin){
                                         const currentIndex = checked.indexOf(num)
