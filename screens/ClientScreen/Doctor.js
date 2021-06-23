@@ -6,58 +6,48 @@ import {
     TouchableOpacity,
     StyleSheet,
     FlatList,
-    SafeAreaView
+    SafeAreaView,
+    Image
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons, AntDesign } from '@expo/vector-icons'; 
 import host from '../../host'
 import axios from 'axios'
-import DoctorModal from '../../components/DoctorModal'
 import CheckBox from 'react-native-check-box'
 import { useNavigation } from "@react-navigation/native";
 
 
 
-const Item = ({ item, onPress, style, onNavigate}) => (
-  <View style={[styles.item, style]}>
-    <View style={styles.infor}>
-        <TouchableOpacity onPress={onPress}>
+const Item = ({ item, onDetailPress, style}) => (
+  <TouchableOpacity onPress={onDetailPress}>
+    <View style={[styles.item, style]}>
+        <View style={{justifyContent: 'center', marginLeft: 25}}>
+            <Image 
+            style={{width: 90, height: 90, borderRadius: 50}} 
+            source={{uri: host + item.avatar}} />
+        </View>
+        <View style={styles.infor}>
+            <View style={{flexDirection: 'row', marginLeft: 5}}>
+                <Text style={styles.cmt_text}>{item.reviewAVG ? item.reviewAVG : 'Not yet'} </Text>
+                <AntDesign style={{marginTop: 1}} name="star" size={13} color="orange" />
+            </View>
             <Text style={styles.title}>{item.fullname}</Text>
             <Text style={styles.phone}>Phone: {item.phone}</Text>
-        </TouchableOpacity>
-    </View>
-    <View style={styles.chat}>
-        <TouchableOpacity onPress={onNavigate}>
-            <Text style={styles.chat_text}>Chat</Text>
-        </TouchableOpacity>
-    </View>
-  </View>  
+        </View>
+    </View>  
+  </TouchableOpacity>
+
 );
 
 const Flatlist = (props) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState({})
   const navigation = useNavigation()
   
-  const handleSetModal = () => {
-     setModalVisible(!modalVisible)
-  }
-
-  const handleModal = (id) => {
-    // console.log(id);  
-    const dataFilter = props.data.filter(dt => id == dt._id)
-    setData(dataFilter[0])
-    handleSetModal()
-  }
-
   const renderItem = ({ item }) => {
     const backgroundColor = '#f2f2f2'
     return (
       <Item
         item={item}
         style={{ backgroundColor }}
-        onPress={() => handleModal(item._id)}
-        onNavigate={() => navigation.navigate('Chat', {doctor: item})}
-        modal={modalVisible}
+        onDetailPress={() => navigation.navigate('DoctorDetail', {doctor: item})}
       />
     );
   };
@@ -71,8 +61,6 @@ const Flatlist = (props) => {
         showsVerticalScrollIndicator={false}
         // extraData={selectedId}
       />
-     <DoctorModal data={data} modal={modalVisible} setModal={handleSetModal} />
-
     </SafeAreaView>
   );
 };
@@ -90,11 +78,21 @@ export default function Doctor({navigation}){
     const [data, setData] = useState([])
     const [dataSearch, setDataSearch] = useState([])
     const [dataAfterSearch, setDataAfterSearch] = useState([])
-
+    const ratingTotal = (rate) => {
+        let total = 0
+        for(let i of rate){
+            total += i.rating 
+        }
+        total = total/rate.length
+        return total
+    }
     const getAllDoctors = async() => {
        const res = await axios.get(host+ '/doctors/getalldoctors')
-       setData(res.data)
-       setDataSearch(res.data)
+       const newData = res.data.map(dt => {
+            return {...dt, reviewAVG: ratingTotal(dt.review)}
+        })
+       setData(newData)
+       setDataSearch(newData)
     }
   
     useEffect(() => {
@@ -243,13 +241,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     title: {
-        marginLeft: 20,
+        marginLeft: 5,
         marginTop: 5,
         fontSize: 17,
     },
     phone: {
         color: 'gray',
-        marginLeft: 20,
+        marginLeft: 5,
         marginTop: 10
     },
     infor: {

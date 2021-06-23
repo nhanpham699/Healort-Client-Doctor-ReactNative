@@ -277,7 +277,7 @@ export default function Profile({navigation}) {
             </View>
             <ScrollView style={styles.footer}>
                 <View>
-                    <Text style={styles.label}>Date Birth</Text>
+                    <Text style={styles.label}>Birth date</Text>
 
                     <View style={{position: 'absolute', right: 12, top: 60, zIndex: 10}}>
                         {edit &&

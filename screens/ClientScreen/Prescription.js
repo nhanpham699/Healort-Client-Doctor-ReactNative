@@ -28,7 +28,12 @@ const Prescription = ({navigation}) => {
       setPres(res.data)
       console.log(res.data);  
   }  
-    
+  
+  const handleDelete = async (id) => {
+      await axios.post(host + "/prescriptions/delete", {id: id})
+      .then(() => getData())
+  }
+
   useEffect(() => {
     getData()
   },[])  
@@ -68,9 +73,22 @@ const Prescription = ({navigation}) => {
                     </View>
                     ))} 
                 </View>    
+                <List.Item title={'Disease: ' + pr.disease} />
                 <List.Item title={'Times: ' + pr.times} />
                 <List.Item title={'Total: ' + pr.total + '$'} />
-                <List.Item title={'Note: ' + pr.note} />               
+                <List.Item title={'Note: ' + pr.note} />
+                <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                  <TouchableOpacity onPress={() => handleDelete(pr._id)}>
+                      <View style={styles.button}>
+                          <LinearGradient
+                              colors={['#D4919E','#C13815']}
+                              style={styles.update}
+                          >
+                              <Text style={styles.update_text}>Delete</Text>
+                          </LinearGradient>
+                      </View>
+                  </TouchableOpacity> 
+                </View>                
             </List.Accordion>
             )) : <View style={{marginTop: '50%', alignItems: 'center'}}>
                     <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
@@ -105,6 +123,20 @@ var styles = StyleSheet.create({
   servicetext: {
     marginTop: 14,
     fontSize: 16
+  },
+  update: {
+    borderColor: '#00bfff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 30,
+    width: 75,
+    borderRadius: 10,
+    marginRight: 10,
+    marginTop: 10
+  },
+  update_text: {
+      color: 'rgba(0, 0, 0, 0.7)',
+      fontWeight: '600',
   },
 })
 

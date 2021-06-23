@@ -30,43 +30,31 @@ export default DoctorModal = (props) => {
                   style={{width: 100, height: 100, borderRadius: 50}} />
               </View>
               <View style={styles.footer_component}>
-                  <Text style={[styles.footer_text, styles.footer_left, styles.footer_title]} >Birth Year:</Text>
-                  <Text style={[styles.footer_text, styles.footer_right]} >{data.birthyear}</Text>
+                  <Text style={[styles.footer_text, styles.footer_left, styles.footer_title]} >Birth date:</Text>
+                  <Text style={[styles.footer_text, styles.footer_right]} >
+                  {(new Date(data.date)).getDate() 
+                  + "-" + ((new Date(data.date)).getMonth()+1) 
+                  + "-" + (new Date(data.date)).getFullYear()}
+                  </Text>
               </View>
               <View style={styles.footer_component}>
                   <Text style={[styles.footer_text, styles.footer_left, styles.footer_title]} >Gender:</Text>
                   <Text style={[styles.footer_text, styles.footer_right]} >{data.gender ? 'Male' : 'fale'}</Text>
               </View>
               <View style={styles.footer_component}>
-                  <Text style={[styles.footer_text, styles.footer_left, styles.footer_title]} >Hometown:</Text>
-                  <Text style={[styles.footer_text, styles.footer_right]} >{data.hometown}</Text>
+                  <Text style={[styles.footer_text, styles.footer_left, styles.footer_title]} >Address:</Text>
+                  <Text style={[styles.footer_text, styles.footer_right]} >{data.address ? data.address.city : ''}</Text>
               </View>
               <View style={styles.footer_component}>
                   <Text style={[styles.footer_text, styles.footer_left, styles.footer_title]} >Phone:</Text>
                   <Text style={[styles.footer_text, styles.footer_right]} >{data.phone}</Text>
               </View>
-              <View style={styles.footer_component}>
-                  <Text style={[styles.footer_text, styles.footer_left, styles.footer_title]} >Experience:</Text>
-                  <Text style={[styles.footer_text, styles.footer_right]} >{data.experience} years</Text>
-              </View>
-              <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                  <TouchableOpacity onPress={() => {
-                        navigation.navigate("MakeaApp", {doctorId : data._id})
-                        setModal()
-                    }}>
-                      <View style={styles.button}>
-                          <LinearGradient
-                          colors={['#CECCF5','#0970BE']}
-                          style={styles.update} >
-                              <Text style={styles.update_text}>Make</Text>
-                          </LinearGradient>
-                      </View>
-                  </TouchableOpacity> 
+              <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <TouchableOpacity onPress={setModal}>
                       <View style={styles.button}>
                           <LinearGradient
                           colors={['#D4919E','#C13815']}
-                          style={[styles.update, {marginRight: 20}]} >
+                          style={styles.update} >
                               <Text style={styles.update_text}>Close</Text>
                           </LinearGradient>
                       </View>

@@ -7,7 +7,8 @@ import {
     StatusBar,
     Image,
     Alert,
-    ScrollView
+    ScrollView,
+    RefreshControl
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'; 
 import { LinearGradient } from 'expo-linear-gradient'
@@ -17,10 +18,21 @@ import axios from 'axios';
 import host from '../../host';
 import ScheduleModal from '../../components/ScheduleModal'
 
+const wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout))
+}
+
 export default function Notifications({navigation}){
 
     const { notification } = useSelector(state => state.notifications)
-
+    const [refreshing, setRefreshing] = useState(false)
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        wait(1000).then(() => {
+            setRefreshing(false)
+            getData()
+        })
+    })
 
     const [modalVisible, setModalVisible] = useState({
         id: "",
@@ -241,7 +253,14 @@ export default function Notifications({navigation}){
                 </TouchableOpacity>
                 <Text style={styles.headertext1}>Notifications</Text> 
             </View>
-            <ScrollView style={styles.content}>
+            <ScrollView 
+            refreshControl={
+                <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                /> 
+            }
+            style={styles.content} >
                 {data.length ? data.map((notif,index) => (
                         <View  key={index} style={styles.item} >
                             <View style={{width: '25%'}}>

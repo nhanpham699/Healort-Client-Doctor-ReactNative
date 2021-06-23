@@ -7,9 +7,10 @@ import {
     TouchableOpacity,
     Button,    
     Alert,
-    ScrollView
+    ScrollView,
+    RefreshControl
 } from 'react-native'
-import { Ionicons,  FontAwesome } from '@expo/vector-icons'; 
+import { Ionicons, Entypo, FontAwesome } from '@expo/vector-icons'; 
 import { LinearGradient } from 'expo-linear-gradient'
 import host from '../../host'
 import { List } from 'react-native-paper';
@@ -19,10 +20,12 @@ import {useSelector} from 'react-redux'
 import PrescriptionModal from '../../components/PrescriptionModal'
 
 const DoctorSchedule = ({navigation}) => {
+
   const { doctor } = useSelector(state => state.doctors)
   const [modalVisible1, setModalVisible1] = useState(false);
-  const [data, setData] = useState([])
-
+  const [data1, setData1] = useState([])
+  const [data2, setData2] = useState([])
+  const [component, setComponent] = useState(0)
   
   const handleUpdate = (id, user, doctorName, doctorId) => {
      navigation.navigate("UpdateSchedules", {id: id, user: user, doctorName: doctorName, doctorId: doctorId, actor: 'doctor'})
@@ -61,7 +64,10 @@ const DoctorSchedule = ({navigation}) => {
   const getSchedules = async() => {
       const res = await axios.get(host + '/schedules/getallbydoctor/' + doctor.id)
       const newData = res.data.filter(dt => dt.status != 2 && dt.status != 3)
-      setData(newData)
+      const examed = newData.filter(dt => dt.status == 1)
+      const exam = newData.filter(dt => dt.status == 0)
+      setData1(exam)
+      setData2(examed)
   }
 
   useEffect(() => {
@@ -76,9 +82,41 @@ const DoctorSchedule = ({navigation}) => {
             </TouchableOpacity>
             <Text style={styles.headertext1}>My Schedules</Text> 
         </View>
-        <ScrollView style={{backgroundColor: 'white', flex: 1, marginTop: 20}}>
+        <ScrollView 
+        style={{backgroundColor: 'white', flex: 1, marginTop: 20}}>
+          <View style={{
+            flexDirection: 'row', 
+            justifyContent: 'center', 
+            backgroundColor: '#EAEAEA',
+            marginTop: 30,
+            marginBottom: 20,
+            marginHorizontal: 56,
+            borderRadius: 25
+          }}>
+            <TouchableOpacity onPress={() => setComponent(0)}>
+                <View style={styles.button}>
+                    <LinearGradient
+                        colors={component ? ['#EAEAEA', '#EAEAEA'] : ['#2193b0','#6dd5ed']}
+                        style={styles.schedules}
+                    >
+                        <Text style={styles.schedules_text}>Examed</Text>
+                    </LinearGradient>
+                </View>
+            </TouchableOpacity>  
+            <TouchableOpacity onPress={() => setComponent(1)}>
+                <View style={styles.button}>
+                    <LinearGradient
+                        colors={!component ? ['#EAEAEA','#EAEAEA'] : ['#2193b0','#6dd5ed']}
+                        style={styles.schedules}
+                    >
+                        <Text style={styles.schedules_text}>Note examed yet</Text>
+                    </LinearGradient>
+                </View>
+            </TouchableOpacity> 
+          </View>
+          {!component ? 
           <List.Section>
-            {data.length ? data.map((sch) => (
+            {data2.length ? data2.map((sch) => (
               <List.Accordion
                 key={sch._id}
                 title={(new Date(sch.date)).getDate() + "-" + ((new Date(sch.date)).getMonth()+1) + "-" + (new Date(sch.date)).getFullYear()}
@@ -88,30 +126,27 @@ const DoctorSchedule = ({navigation}) => {
                 <List.Item title={'Client name: ' + sch.userId.fullname} />
                 <View style={{flexDirection: 'row', marginBottom: 15}}>
                   <Text style={{fontSize: 15, marginLeft: 7, marginTop: 10}}>Services: </Text>
-                {sch.services.map((ser,index) => (
-                    <View key={index} >
-                      {(ser == 0) && <Text style={styles.servicetext}>Tooth extraction</Text>}
-                      {(ser == 1) && <Text style={styles.servicetext}> Fillings</Text>}
-                      {(ser == 2) && <Text style={styles.servicetext}> Dental implants</Text>}
-                    </View>
-                ))} 
+                  <View style={{flexDirection: 'column'}}>
+                    {sch.services.map((ser,index) => (
+                      <View style={{flexDirection: 'row'}} key={index} >
+                        <Entypo style={{marginTop: 8}} name="dot-single" size={24} color="black" />
+                        <Text style={styles.servicetext}>{ser.name} </Text>
+                      </View>
+                    ))} 
+                  </View>
                 </View>    
-                {sch.status 
-                ? 
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                    {sch.status !=3 && 
-                        <TouchableOpacity onPress={() => handleSuccess(sch._id)}>
-                            <View style={styles.button}>
-                                <LinearGradient
-                                    colors={['#76b852','#8DC26F']}
-                                    style={styles.update}
-                                >
-                                    <Text style={styles.update_text}>Success</Text>
-                                </LinearGradient>
-                            </View>
-                        </TouchableOpacity>
-                    }
-                    {!sch.reexam && sch.status !=3 &&
+                    <TouchableOpacity onPress={() => handleSuccess(sch._id)}>
+                        <View style={styles.button}>
+                            <LinearGradient
+                                colors={['#76b852','#8DC26F']}
+                                style={styles.update}
+                            >
+                                <Text style={styles.update_text}>Success</Text>
+                            </LinearGradient>
+                        </View>
+                    </TouchableOpacity>
+                    {!sch.reexam &&
                     <TouchableOpacity onPress={() => navigation.navigate('ReExam', {doctor : sch.doctorId, userId: sch.userId._id ,scheduleId: sch._id})}>
                         <View style={styles.button}>
                             <LinearGradient
@@ -123,7 +158,7 @@ const DoctorSchedule = ({navigation}) => {
                         </View>
                     </TouchableOpacity>
                     }
-                    {!sch.prescription && sch.status !=3 &&  
+                    {!sch.prescription &&  
                     <TouchableOpacity onPress={handlePrescription}>
                         <View style={styles.button}>
                             <LinearGradient
@@ -136,7 +171,38 @@ const DoctorSchedule = ({navigation}) => {
                     </TouchableOpacity>  
                     }
                 </View>
-                :    
+                <PrescriptionModal 
+                data={sch} 
+                modal={modalVisible1} 
+                setModal={handlePrescription}
+                getData={getSchedules} /> 
+              </List.Accordion>
+            )) : <View style={{marginTop: '50%', alignItems: 'center'}}>
+                    <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
+                 </View> }
+                 
+          </List.Section>
+          :
+          <List.Section>
+            {data1.length ? data1.map((sch) => (
+              <List.Accordion
+                key={sch._id}
+                title={(new Date(sch.date)).getDate() + "-" + ((new Date(sch.date)).getMonth()+1) + "-" + (new Date(sch.date)).getFullYear()}
+                left={props => <List.Icon {...props} icon="calendar-today" />}
+                >
+                <List.Item style={{marginTop: -10}} title={'Time: ' + sch.begin + ':00'} />
+                <List.Item title={'Client name: ' + sch.userId.fullname} />
+                <View style={{flexDirection: 'row', marginBottom: 15}}>
+                  <Text style={{fontSize: 15, marginLeft: 7, marginTop: 10}}>Services: </Text>
+                  <View style={{flexDirection: 'column'}}>
+                    {sch.services.map((ser,index) => (
+                      <View style={{flexDirection: 'row'}} key={index} >
+                        <Entypo style={{marginTop: 8}} name="dot-single" size={24} color="black" />
+                        <Text style={styles.servicetext}>{ser.name} </Text>
+                      </View>
+                    ))} 
+                  </View>
+                </View>    
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
                   {(!sch.confirmation ? sch.confirmation : sch.confirmation.date )?
                       <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
@@ -194,23 +260,19 @@ const DoctorSchedule = ({navigation}) => {
                   </View>
                   } 
                 </View> 
-                }
-                <PrescriptionModal 
-                data={sch} 
-                modal={modalVisible1} 
-                setModal={handlePrescription}
-                getData={getSchedules} /> 
               </List.Accordion>
             )) : <View style={{marginTop: '50%', alignItems: 'center'}}>
                     <Text style={{fontSize: 25, letterSpacing: 10}}>N0THING</Text>
                  </View> }
+                 
           </List.Section>
+          }
         </ScrollView>
     </View>
   );
 };
 
-var styles = StyleSheet.create({
+var styles = StyleSheet.create({  
   container: {
       flex: 1
   },
@@ -248,6 +310,17 @@ var styles = StyleSheet.create({
   update_text: {
       color: 'rgba(0, 0, 0, 0.7)',
       fontWeight: '600',
+  },
+  schedules: {
+    width: 150,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 25,
+  },
+  schedules_text: {
+    fontSize: 16,
+    fontWeight: '500'
   },
 })
 

@@ -1,6 +1,6 @@
   
 import React, {useEffect, useState} from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { View, Text, Button, TouchableOpacity, StyleSheet, FlatList,  RefreshControl} from 'react-native';
 import {
   Container,
   Card,
@@ -17,6 +17,10 @@ import { Ionicons } from '@expo/vector-icons';
 import host from '../../host'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
+
+const wait = (timeout) => {
+  return new Promise(resolve => setTimeout(resolve, timeout))
+}
 
 const Messages = [
   {
@@ -39,7 +43,14 @@ const MessagesScreen = ({navigation}) => {
 
     const [messages, setMessages] = useState([])
     const { user } = useSelector(state => state.users)
-
+    const [refreshing, setRefreshing] = useState(false)
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        wait(1000).then(() => {
+            setRefreshing(false)
+            getMessages()
+        })
+    })
     const getMessages = async() => {
         const doctorsList = []
         const res = await axios.get(host + '/chats/getUserListMessages/' + user.id)
@@ -84,7 +95,13 @@ const MessagesScreen = ({navigation}) => {
             </View>
             <Container>
                 {messages.length ? 
-                <FlatList 
+                <FlatList
+                refreshControl={
+                  <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  /> 
+                } 
                 style={{marginTop: 20}}  
                 data={messages}
                 keyExtractor={item=>item._id}

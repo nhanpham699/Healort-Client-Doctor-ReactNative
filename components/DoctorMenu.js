@@ -33,7 +33,7 @@ const DATA = [
   },
   {
     id: "6",
-    title: "Exxamination history",
+    title: "Examination history",
     icon: "calendar"
   }
 ];

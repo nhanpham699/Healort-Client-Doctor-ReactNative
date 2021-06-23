@@ -7,7 +7,8 @@ import {
     Button,    
     Alert,
     ScrollView,
-    TextInput
+    TextInput,
+    KeyboardAvoidingView
 } from 'react-native'
 import { Ionicons,  FontAwesome } from '@expo/vector-icons'; 
 import { LinearGradient } from 'expo-linear-gradient'
@@ -117,6 +118,7 @@ export default function BusyDoctor({navigation}) {
     },[])
 
     return(
+        <KeyboardAvoidingView style={{flex:1}} behavior="padding">
         <View style={styles.container}>
              <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -124,6 +126,7 @@ export default function BusyDoctor({navigation}) {
                 </TouchableOpacity>
                 <Text style={styles.headertext1}>Busy times</Text> 
             </View>
+            <ScrollView>
             <View>
             <Calendar
             markingType={'period'}
@@ -187,7 +190,9 @@ export default function BusyDoctor({navigation}) {
                     </View>
                 </TouchableOpacity> 
             </View>
+            </ScrollView>
         </View>
+        </KeyboardAvoidingView>
     )
 }
 

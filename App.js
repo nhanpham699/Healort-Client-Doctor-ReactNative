@@ -36,6 +36,7 @@ import DoctorReExam from  './screens/DoctorScreen/DoctorReExamList'
 import ShowExaminationSlip from './screens/ClientScreen/ShowExamSlip'
 import Prescription from './screens/ClientScreen/Prescription'
 import DoctorExamHistory from './screens/DoctorScreen/DoctorExamHistory'
+import DoctorDetail from './screens/ClientScreen/DoctorDetail'
 
 const Stack = createStackNavigator();
 
@@ -57,6 +58,7 @@ const App = () => {
             <Stack.Screen name="Doctor" component={Doctor} />
             <Stack.Screen name="MakeaApp" component={MakeaApp} />
             <Stack.Screen name="Chat" component={Chat} />
+            <Stack.Screen name="DoctorDetail" component={DoctorDetail} />
             <Stack.Screen name="DoctorChat" component={DoctorChat} />
             <Stack.Screen name="ExamHistory" component={ExamHistory} />
             <Stack.Screen name="DoctorExamHistory" component={DoctorExamHistory} />

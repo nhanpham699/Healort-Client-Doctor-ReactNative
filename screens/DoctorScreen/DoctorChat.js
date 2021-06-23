@@ -108,7 +108,7 @@ const ChatScreen = ({navigation,route}) => {
             <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Ionicons style={styles.back} name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
-            <Text style={styles.headertext1}>{doctor.fullname}</Text> 
+            <Text style={styles.headertext1}>{route.params.user.fullname}</Text> 
         </View>
         <View style={styles.body}>  
         <GiftedChat

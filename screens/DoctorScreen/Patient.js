@@ -13,6 +13,7 @@ import host from '../../host'
 import axios from 'axios'
 import { useNavigation } from "@react-navigation/native";
 import {useSelector} from 'react-redux'
+import PatientModal from '../../components/PatientModal'
 
 
 
@@ -70,7 +71,7 @@ const Flatlist = (props) => {
         showsVerticalScrollIndicator={false}
         // extraData={selectedId}
       />
-     <DoctorModal data={data} modal={modalVisible} setModal={handleSetModal} />
+     <PatientModal data={data} modal={modalVisible} setModal={handleSetModal} />
 
     </SafeAreaView>
   );
@@ -96,7 +97,7 @@ export default function Patient({navigation}){
        const dataMap = res.data.map(dt => dt.userId)
        const dataTest = dataMap.map(dt => dt._id)
        const newData = dataMap.filter((dt, index) => dataTest.indexOf(dt._id) == index )
-
+     
        setData(newData)
        setDataSearch(newData)
     }

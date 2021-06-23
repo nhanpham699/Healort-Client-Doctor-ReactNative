@@ -5,11 +5,11 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Button,    
+    RefreshControl,    
     Alert,
     ScrollView
 } from 'react-native'
-import { Ionicons,  FontAwesome } from '@expo/vector-icons'; 
+import { Ionicons,  FontAwesome, Entypo } from '@expo/vector-icons'; 
 import { LinearGradient } from 'expo-linear-gradient'
 import host from '../../host'
 import { List } from 'react-native-paper';
@@ -17,10 +17,23 @@ import axios from 'axios';
 import {useSelector, useDispatch} from 'react-redux'
 import {addDoctorInfor} from '../../actions/doctor.infor'
 
+const wait = (timeout) => {
+  return new Promise(resolve => setTimeout(resolve, timeout))
+}
 
 const Schedule = ({navigation}) => {
 
   const [component, setComponent] = useState(0)
+
+  const [refreshing, setRefreshing] = useState(false)
+  const onRefresh = React.useCallback(() => {
+      setRefreshing(true);
+      wait(1000).then(() => {
+          setRefreshing(false)
+          getAllSchedules()
+          getAllReexams()
+      })
+  })
 
   const dispatch = useDispatch()
   const { user } = useSelector(state => state.users)
@@ -186,7 +199,14 @@ const Schedule = ({navigation}) => {
             </TouchableOpacity>
             <Text style={styles.headertext1}>My Schedules</Text> 
         </View>
-        <ScrollView style={{backgroundColor: 'white', flex: 1, marginTop: 20}}>
+        <ScrollView
+        refreshControl={
+            <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            /> 
+        } 
+        style={{backgroundColor: 'white', flex: 1, marginTop: 20}}>
           <View style={{
             flexDirection: 'row', 
             justifyContent: 'center', 
@@ -232,13 +252,14 @@ const Schedule = ({navigation}) => {
                 </TouchableOpacity>
                 <View style={{flexDirection: 'row', marginBottom: 15}}>
                   <Text style={{fontSize: 16, marginLeft: 7, marginTop: 14}}>Services: </Text>
-                {sch.services.map((ser,index) => (
-                    <View key={index} >
-                      {(ser == 0) && <Text style={styles.servicetext}>Tooth extraction</Text>}
-                      {(ser == 1) && <Text style={styles.servicetext}> Fillings</Text>}
-                      {(ser == 2) && <Text style={styles.servicetext}> Dental implants</Text>}
-                    </View>
-                ))} 
+                  <View style={{flexDirection: 'column'}}>
+                    {sch.services.map((ser,index) => (
+                      <View style={{flexDirection: 'row'}} key={index} >
+                        <Entypo style={{marginTop: 12}} name="dot-single" size={24} color="black" />
+                        <Text style={styles.servicetext}>{ser.name} </Text>
+                      </View>
+                    ))} 
+                  </View>
                 </View>    
               
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>

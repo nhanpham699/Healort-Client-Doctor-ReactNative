@@ -9,7 +9,7 @@ import {
     Alert,
     ScrollView
 } from 'react-native'
-import { Ionicons, AntDesign } from '@expo/vector-icons'; 
+import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons'; 
 import { LinearGradient } from 'expo-linear-gradient'
 import host from '../../host'
 import { List } from 'react-native-paper';
@@ -44,8 +44,8 @@ const ExamHistory = ({navigation}) => {
 
   const getAllSchedules = async() => {
     const res = await axios.get(host + '/schedules/getallschedules/' + user.id)
-    const newData = res.data.filter(dt => dt.status === 1)
-    setData(newData)
+    const newData = res.data.filter(dt => dt.status == 3 )
+    setData(newData.slice(0,7).reverse())
   }
 
   useEffect(() => {
@@ -73,13 +73,14 @@ const ExamHistory = ({navigation}) => {
                 <List.Item title={'Doctor: ' + sch.doctorId.fullname} />
                 <View style={{flexDirection: 'row', marginBottom: 15}}>
                   <Text style={{fontSize: 15, marginLeft: 7, marginTop: 10}}>Services: </Text>
-                {sch.services.map((ser,index) => (
-                    <View key={index} >
-                      {(ser == 0) && <Text style={styles.servicetext}>Tooth extraction</Text>}
-                      {(ser == 1) && <Text style={styles.servicetext}> Fillings</Text>}
-                      {(ser == 2) && <Text style={styles.servicetext}> Dental implants</Text>}
-                    </View>
-                ))} 
+                  <View style={{flexDirection: 'column'}}>
+                    {sch.services.map((ser,index) => (
+                      <View style={{flexDirection: 'row'}} key={index} >
+                        <Entypo style={{marginTop: 8}} name="dot-single" size={24} color="black" />
+                        <Text style={styles.servicetext}>{ser.name} </Text>
+                      </View>
+                    ))} 
+                  </View>
                 </View>
                 {!sch.doctorId.review.find(x => x.scheduleId == sch._id) ?   
                 <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>

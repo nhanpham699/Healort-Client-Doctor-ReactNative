@@ -23,7 +23,6 @@ export default function Checkout({navigation, route}){
     const dispatch = useDispatch()
     const [dataCheckOut, setDataCheckOut] = useState({})
     const [doctor, setDoctor] = useState({})
-    const [total, setTotal] = useState(0)
     const { data } = route.params
     useEffect(() => {
 
@@ -32,15 +31,11 @@ export default function Checkout({navigation, route}){
             // console.log(res.data);
             setDoctor(res.data)
         })
-        let Total = 0
-        if(data.services.indexOf(0) != -1) 
-            Total += 100 
-        if(data.services.indexOf(1) != -1) 
-            Total += 50 
-        if(data.services.indexOf(2) != -1) 
-            Total += 500
-        setTotal(Total)     
-        setDataCheckOut({...data, total: Total, date: new Date(data.date)})
+        let total = 0
+        for(let i of data.services){
+            total += i.price
+        }  
+        setDataCheckOut({...data, total: total, date: new Date(data.date)})
 
     },[])
 
@@ -137,9 +132,7 @@ export default function Checkout({navigation, route}){
                             <View style={[styles.footer_right, {marginTop: 13}]}>
                             {data.services.map((ser,index) => (
                                 <View key={index} >
-                                {(ser == 0) && <Text style={styles.service_text}>Tooth extraction (100$)</Text>}
-                                {(ser == 1) && <Text style={styles.service_text}>Fillings (50$)</Text>}
-                                {(ser == 2) && <Text style={styles.service_text}>Dental implants (500$)</Text>}
+                                    <Text style={styles.service_text}>{ser.name} ({ser.price}$)</Text>
                                 </View>
                             ))} 
                             </View> 
@@ -154,7 +147,7 @@ export default function Checkout({navigation, route}){
                         </View>
                         <View style={styles.footer_component}>
                             <Text style={[styles.footer_text, styles.footer_left, styles.footer_title]} >Total:</Text>
-                            <Text style={[styles.footer_text, styles.footer_right]} >{total}$</Text>
+                            <Text style={[styles.footer_text, styles.footer_right]} >{dataCheckOut.total}$</Text>
                         </View>
                     </View>
                     <View>

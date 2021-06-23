@@ -93,6 +93,7 @@ export default function ReExam({navigation, route}) {
         doctorId: doctor._id,
         scheduleId: scheduleId,
         note: null,
+        problenm: null,
         userId: userId,
         status: 0,
     })    
@@ -267,7 +268,7 @@ export default function ReExam({navigation, route}) {
 
     const make = async() => {
         
-        if(!data.date || !data.doctorId || !data.begin || !data.note){
+        if(!data.date || !data.doctorId || !data.begin || !data.note || !data.problem){
             alert("Make an appointment failed!!")
         }else{
             await axios.post(host + '/reexams/add', data)
@@ -334,6 +335,15 @@ export default function ReExam({navigation, route}) {
                     </View>
                     <View style={styles.footer}>
                         <View>
+                            <Text style={styles.choose}>Problem</Text>
+                            <View style={{paddingHorizontal: 15}}>
+                                <TextInput 
+                                // defaultValue={user.phone}
+                                placeholder="   problem" 
+                                style={styles.text_input} 
+                                autoCapitalize="none"
+                                onChangeText={value => setData({...data, problem: value})} />
+                            </View>
                             <Text style={styles.choose}>Note</Text>
                             <View style={{paddingHorizontal: 15}}>
                                 <TextInput 

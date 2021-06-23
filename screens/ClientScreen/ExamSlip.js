@@ -70,9 +70,7 @@ export default function ExamSlip({navigation, route}){
                         <View style={[styles.footer_right, {marginTop: 13}]}>
                         {data.services.map((ser,index) => (
                             <View key={index} >
-                            {(ser == 0) && <Text style={styles.service_text}>Tooth extraction (100$)</Text>}
-                            {(ser == 1) && <Text style={styles.service_text}>Fillings (50$)</Text>}
-                            {(ser == 2) && <Text style={styles.service_text}>Dental implants (500$)</Text>}
+                                <Text style={styles.service_text}>{ser.name} ({ser.price}$)</Text>
                             </View>
                         ))} 
                         </View> 

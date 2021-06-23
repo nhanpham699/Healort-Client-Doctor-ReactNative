@@ -82,13 +82,12 @@ export default function MakeaApp({navigation, route}) {
 
     const doctorId = route.params ? route.params.doctorId : null
     const { user } = useSelector(state => state.users)
-    const [isChecked, setIsChecked] = useState({
-        first : false,
-        second : false,
-        third : false
-    })
 
-    const [checked, setChecked] = useState([])
+    const [checked, setChecked] = useState([{
+        serviceId: null,
+        name: "",
+        price: 0
+    }])
     const [service, setService] = useState([])
     const [dateArr, setDateArr] = useState(DATE_DATA)
     const [hourArr, setHourArr] = useState(HOUR_DATA)
@@ -152,9 +151,6 @@ export default function MakeaApp({navigation, route}) {
     };
     
     const chooseDoctor = (value) => {
-
-        
-
         setDoctorChecked({
             id: value,
             isChecked: true
@@ -181,8 +177,6 @@ export default function MakeaApp({navigation, route}) {
             }
         }        
 
-       
-
         const scheduleArr = schedules.filter(dt => {
             return dt.doctorId._id == value && dt.status == 0
         })
@@ -194,8 +188,6 @@ export default function MakeaApp({navigation, route}) {
         for(let re of reexamArr){
             scheduleArr.push(re)
         }
-
-
 
         for(let sch of scheduleArr){
             for (let i = 0; i < dateArr.length; i++){
@@ -378,20 +370,24 @@ export default function MakeaApp({navigation, route}) {
                                     key={num}
                                     onClick={()=>{
                                         if(data.begin){
-                                        const currentIndex = checked.indexOf(num)
+                                        const currentIndex = checked.findIndex(x => x.serviceId == ser._id)
                                         const newChecked = [...checked]
 
                                         if(currentIndex === -1){
-                                            newChecked.push(num)
+                                            newChecked.push({
+                                                serviceId: ser._id,
+                                                name: ser.name,
+                                                price: ser.price
+                                            })
                                         }else {
                                             newChecked.splice(currentIndex, 1)
                                         }
-                                        console.log(newChecked, num, currentIndex)
+                                        // console.log(newChecked, num, currentIndex)
                                         setChecked(newChecked)
                                         }else alert("choose time please!")
                                     }}
-                                    isChecked={ (checked.indexOf(num) != -1) ? true : false}
-                                    leftText={ser.name + ' ' + '(' + ser.price + ')'}
+                                    isChecked={ (checked.findIndex(x => x.serviceId == ser._id) != -1) ? true : false}
+                                    leftText={ser.name + ' ' + '(' + ser.price + '$)'}
                                 />
                             ))}
                         </View>  
